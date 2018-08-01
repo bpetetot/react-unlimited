@@ -6,7 +6,7 @@ import Infinite from "./infinite";
 import "./app.css";
 
 const App = () => {
-  const items = range(1, 1000).map((id) => ({
+  const items = range(0, 1000).map((id) => ({
     id,
     name: `item-${id}`
   }));
@@ -17,7 +17,7 @@ const App = () => {
       <Infinite
         items={items}
         rowHeight={50}
-        itemsVisible={30}
+        overscan={3}
         scrollerRef={window}
       />
     </div>

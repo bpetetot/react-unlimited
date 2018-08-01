@@ -7,6 +7,7 @@ import './infinite.css';
 class Infinite extends Component {
   state = {
     itemsWindow: [],
+    itemsIndexes: [],
   }
 
   wrapper = React.createRef();
@@ -16,19 +17,21 @@ class Infinite extends Component {
     let ticking = false;
 
     this.listener = window.addEventListener('scroll', (e) => {
-      const { scrollY, clientHeight } = window;
+      const { scrollY, innerHeight } = window;
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const listTop = scrollY - current.offsetTop;
-          console.log(clientHeight)
-          this.renderList(listTop >= 0 ? listTop : 0);
+          this.renderList(
+            listTop >= 0 ? listTop : 0,
+            listTop >= 0 ? innerHeight : innerHeight - current.offsetTop // if not window on scroll then clientHeight of element
+          );
           ticking = false;
         });
       }
       ticking = true;
     })
 
-    this.renderList()
+    this.renderList(0, window.innerHeight - current.offsetTop) // if not window on scroll then clientHeight of element
   }
 
   componentWillUnmount() {
@@ -37,15 +40,18 @@ class Infinite extends Component {
     }
   }
 
-  renderList = (top = 0) => {
-    const { items, rowHeight, itemsVisible } = this.props;
+  renderList = (top = 0, height) => {
+    const { items, rowHeight, overscan } = this.props;
 
     const minIndex = Math.floor(top / rowHeight);
-    const maxIndex = Math.floor((top + (itemsVisible * rowHeight)) / rowHeight);
+    const maxIndex = Math.floor((top + height) / rowHeight);
+
+    const minIndexOverscan = minIndex - overscan >= 0 ? minIndex - overscan : 0;
+    const maxIndexOverscan = maxIndex + overscan < items.length ? maxIndex + overscan : (items.length - 1);
 
     this.setState({
-      itemsWindow: items.slice(minIndex, maxIndex),
-      itemsIndexes: range(minIndex, maxIndex),
+      itemsWindow: items.slice(minIndexOverscan, maxIndexOverscan + 1),
+      itemsIndexes: range(minIndexOverscan, maxIndexOverscan + 1),
     });
   }
 
@@ -90,13 +96,13 @@ class Infinite extends Component {
 Infinite.propTypes = {
   items: PropTypes.array,
   rowHeight: PropTypes.number,
-  itemsVisible: PropTypes.number,
+  overscan: PropTypes.number,
 }
 
 Infinite.defaultProps = {
   items: [],
   rowHeight: 0,
-  itemsVisible: 10,
+  overscan: 10,
 }
 
 export default Infinite;
