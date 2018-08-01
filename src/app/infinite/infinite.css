@@ -1,0 +1,8 @@
+.infinite-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.infinite-list-item {
+  position: absolute;
+}
