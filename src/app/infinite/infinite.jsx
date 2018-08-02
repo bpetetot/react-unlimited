@@ -17,6 +17,7 @@ class Infinite extends Component {
 
   getScrollElement = () => {
     const { scrollWindow } = this.props;
+
     if (scrollWindow) {
       return window
     } else {
@@ -26,30 +27,43 @@ class Infinite extends Component {
 
   getScrollData = () => {
     const { scrollWindow } = this.props;
+
     return {
-      element: this.getScrollElement(),
-      top: scrollWindow ? window.scrollY : this.scrollContainer.current.scrollTop,
-      height: scrollWindow ? window.innerHeight : this.scrollContainer.current.clientHeight,
+      scrollTop: scrollWindow ? window.scrollY : this.scrollContainer.current.scrollTop,
+      scrollHeight: scrollWindow ? window.innerHeight : this.scrollContainer.current.clientHeight,
+    }
+  }
+
+  scrollTo = (index) => {
+    const { scrollWindow, rowHeight } = this.props;
+    const { current } = this.wrapper;
+    const { scrollHeight } = this.getScrollData();
+
+    const top = index * rowHeight;
+    this.updateList(top, scrollHeight - current.offsetTop);
+
+    if (scrollWindow) {
+      return window.scrollTo({ top }); // FIXME doesnt work when updating
+    } else {
+      return this.scrollContainer.current.scrollTop = top;
     }
   }
 
   componentDidMount() {
-    const { current } = this.wrapper;
     // first render of the list
-    const { element, height } = this.getScrollData();
-    this.updateList(0, height - current.offsetTop)
+    this.scrollTo(this.props.scrollToIndex || 0);
 
     // render on scroll
+    const { current } = this.wrapper;
     let ticking = false;
-    this.listener = element.addEventListener('scroll', (e) => {
+    this.listener = this.getScrollElement().addEventListener('scroll', (e) => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const { offsetTop } = current;
-          const scrollData = this.getScrollData();
-          const top = scrollData.top - offsetTop;
+          const { scrollTop, scrollHeight } = this.getScrollData();
+          const top = scrollTop - current.offsetTop;
           this.updateList(
             top >= 0 ? top : 0,
-            top >= 0 ? scrollData.height : scrollData.height - offsetTop
+            top >= 0 ? scrollHeight : scrollHeight - current.offsetTop
           );
           ticking = false;
         });
@@ -58,10 +72,16 @@ class Infinite extends Component {
     })
   }
 
+  componentDidUpdate(prevProps) {
+    const { scrollToIndex } = this.props;
+    if (scrollToIndex && scrollToIndex !== prevProps.scrollToIndex) {
+      this.scrollTo(scrollToIndex);
+    }
+  }
+
   componentWillUnmount() {
-    const { scrollElement } = this.props;
     if (this.listener) {
-      scrollElement.removeEventListener('scroll', this.listener);
+      this.getScrollElement().removeEventListener('scroll', this.listener);
     }
   }
 
@@ -99,16 +119,12 @@ class Infinite extends Component {
     const { rowHeight } = this.props;
     const { itemsIndexes } = this.state;
     const height = `${rowHeight}px`;
-
+    const top = itemsIndexes[index] * rowHeight;
     return (
       <div
         key={id}
         className="infinite-list-item"
-        style={{
-          height,
-          top: itemsIndexes[index] * rowHeight,
-          left: 0,
-        }}
+        style={{ height, top, left: 0 }}
       >
         {name}
       </div>
@@ -139,6 +155,7 @@ Infinite.propTypes = {
   rowHeight: PropTypes.number,
   overscan: PropTypes.number,
   scrollWindow: PropTypes.bool,
+  scrollToIndex: PropTypes.number,
 }
 
 Infinite.defaultProps = {
@@ -146,6 +163,7 @@ Infinite.defaultProps = {
   rowHeight: 0,
   overscan: 10,
   scrollWindow: false,
+  scrollToIndex: 0,
 }
 
 export default Infinite;

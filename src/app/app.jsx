@@ -8,12 +8,15 @@ import "./app.css";
 class App extends Component {
   state = {
     type: 'container',
+    scrollToIndex: undefined,
   }
 
   select = type => () => this.setState({ type })
 
+  scrollTo = e => this.setState({ scrollToIndex: e.target.value ? Number(e.target.value) : undefined })
+
   render() {
-    const { type } = this.state;
+    const { type, scrollToIndex } = this.state;
 
     const items = range(0, 1000).map((id) => ({
       id,
@@ -25,7 +28,9 @@ class App extends Component {
         <div>
           <button onClick={this.select('container')}>Container scroll</button>
           <button onClick={this.select('window')}>Window scroll</button>
+          <input type="text" placeholder="scrollTo" onChange={this.scrollTo} />
         </div>
+
         {type === 'window' && (
           <Infinite
             items={items}
@@ -34,8 +39,10 @@ class App extends Component {
             scrollerRef={window}
             className="my-list"
             scrollWindow
+            scrollToIndex={scrollToIndex}
           />
         )}
+
         {type === 'container' && (
           <Infinite
             items={items}
@@ -43,6 +50,7 @@ class App extends Component {
             overscan={3}
             scrollerRef={window}
             className="my-list sized-list"
+            scrollToIndex={scrollToIndex}
           />
         )}
       </div>
