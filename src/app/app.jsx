@@ -1,27 +1,53 @@
-import React from "react";
+import React, { Component } from 'react';
 import range from "lodash/range";
 
 import Infinite from "./infinite";
 
 import "./app.css";
 
-const App = () => {
-  const items = range(0, 1000).map((id) => ({
-    id,
-    name: `item-${id}`
-  }));
+class App extends Component {
+  state = {
+    type: 'container',
+  }
 
-  return (
-    <div className="app">
-      <h1>Infinite List</h1>
-      <Infinite
-        items={items}
-        rowHeight={50}
-        overscan={3}
-        scrollerRef={window}
-      />
-    </div>
-  );
-};
+  select = type => () => this.setState({ type })
+
+  render() {
+    const { type } = this.state;
+
+    const items = range(0, 1000).map((id) => ({
+      id,
+      name: `item-${id}`
+    }));
+
+    return (
+      <div className="app">
+        <div>
+          <button onClick={this.select('container')}>Container scroll</button>
+          <button onClick={this.select('window')}>Window scroll</button>
+        </div>
+        {type === 'window' && (
+          <Infinite
+            items={items}
+            rowHeight={50}
+            overscan={3}
+            scrollerRef={window}
+            className="my-list"
+            scrollWindow
+          />
+        )}
+        {type === 'container' && (
+          <Infinite
+            items={items}
+            rowHeight={50}
+            overscan={3}
+            scrollerRef={window}
+            className="my-list sized-list"
+          />
+        )}
+      </div>
+    );
+  }
+}
 
 export default App;

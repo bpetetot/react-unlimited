@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import range from 'lodash/range'
+import range from 'lodash/range';
+
+import List from './list';
 
 import './infinite.css';
 
@@ -11,36 +13,59 @@ class Infinite extends Component {
   }
 
   wrapper = React.createRef();
+  scrollContainer = React.createRef();
+
+  getScrollElement = () => {
+    const { scrollWindow } = this.props;
+    if (scrollWindow) {
+      return window
+    } else {
+      return this.scrollContainer.current
+    }
+  }
+
+  getScrollData = () => {
+    const { scrollWindow } = this.props;
+    return {
+      element: this.getScrollElement(),
+      top: scrollWindow ? window.scrollY : this.scrollContainer.current.scrollTop,
+      height: scrollWindow ? window.innerHeight : this.scrollContainer.current.clientHeight,
+    }
+  }
 
   componentDidMount() {
     const { current } = this.wrapper;
-    let ticking = false;
+    // first render of the list
+    const { element, height } = this.getScrollData();
+    this.updateList(0, height - current.offsetTop)
 
-    this.listener = window.addEventListener('scroll', (e) => {
-      const { scrollY, innerHeight } = window;
+    // render on scroll
+    let ticking = false;
+    this.listener = element.addEventListener('scroll', (e) => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const listTop = scrollY - current.offsetTop;
-          this.renderList(
-            listTop >= 0 ? listTop : 0,
-            listTop >= 0 ? innerHeight : innerHeight - current.offsetTop // if not window on scroll then clientHeight of element
+          const { offsetTop } = current;
+          const scrollData = this.getScrollData();
+          const top = scrollData.top - offsetTop;
+          this.updateList(
+            top >= 0 ? top : 0,
+            top >= 0 ? scrollData.height : scrollData.height - offsetTop
           );
           ticking = false;
         });
       }
       ticking = true;
     })
-
-    this.renderList(0, window.innerHeight - current.offsetTop) // if not window on scroll then clientHeight of element
   }
 
   componentWillUnmount() {
+    const { scrollElement } = this.props;
     if (this.listener) {
-      window.removeEventListener(this.listener);
+      scrollElement.removeEventListener('scroll', this.listener);
     }
   }
 
-  renderList = (top = 0, height) => {
+  updateList = (top = 0, height) => {
     const { items, rowHeight, overscan } = this.props;
 
     const minIndex = Math.floor(top / rowHeight);
@@ -53,6 +78,21 @@ class Infinite extends Component {
       itemsWindow: items.slice(minIndexOverscan, maxIndexOverscan + 1),
       itemsIndexes: range(minIndexOverscan, maxIndexOverscan + 1),
     });
+  }
+
+  renderList = (className) => {
+    const { items, rowHeight } = this.props;
+    const { itemsWindow } = this.state;
+
+    return (
+      <List
+        ref={this.wrapper}
+        items={itemsWindow}
+        height={rowHeight * items.length}
+        renderItem={this.renderItem}
+        className={className}
+      />
+    )
   }
 
   renderItem = ({ id, name }, index) => {
@@ -76,20 +116,21 @@ class Infinite extends Component {
   }
 
   render() {
-    const { items, rowHeight } = this.props;
-    const { itemsWindow } = this.state;
+    const { scrollWindow, className } = this.props;
 
-    const height = `${rowHeight * items.length}px`;
+    if (scrollWindow) {
+      return this.renderList(className);
+    }
 
     return (
       <div
-        ref={this.wrapper}
-        className="infinite-wrapper"
-        style={{ height }}
+        ref={this.scrollContainer}
+        className={className}
+        style={{ overflow: 'auto' }}
       >
-        {itemsWindow.map(this.renderItem)}
+        {this.renderList()}
       </div>
-    );
+    )
   }
 }
 
@@ -97,12 +138,14 @@ Infinite.propTypes = {
   items: PropTypes.array,
   rowHeight: PropTypes.number,
   overscan: PropTypes.number,
+  scrollWindow: PropTypes.bool,
 }
 
 Infinite.defaultProps = {
   items: [],
   rowHeight: 0,
   overscan: 10,
+  scrollWindow: false,
 }
 
 export default Infinite;

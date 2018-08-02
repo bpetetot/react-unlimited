@@ -1,5 +1,12 @@
 .app {
   margin: 20px;
   padding: 10px;
+}
+
+.my-list {
   border: 1px solid grey;
+}
+
+.sized-list {
+  height: 600px;
 }
