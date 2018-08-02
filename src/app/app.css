@@ -3,6 +3,14 @@
   padding: 10px;
 }
 
+.toolbar {
+  margin-bottom: 30px;
+}
+
+.toolbar > * {
+  margin-right: 10px;
+}
+
 .my-list {
   border: 1px solid grey;
 }

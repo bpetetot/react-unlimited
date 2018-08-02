@@ -25,7 +25,7 @@ class App extends Component {
 
     return (
       <div className="app">
-        <div>
+        <div className="toolbar">
           <button onClick={this.select('container')}>Container scroll</button>
           <button onClick={this.select('window')}>Window scroll</button>
           <input type="text" placeholder="scrollTo" onChange={this.scrollTo} />
