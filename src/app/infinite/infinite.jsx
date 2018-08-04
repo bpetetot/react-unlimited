@@ -85,16 +85,13 @@ class Infinite extends Component {
   updateList = (top = 0, height) => {
     const { length, rowHeight, overscan } = this.props;
 
-    const minIndex = Math.floor(top / rowHeight);
-    const maxIndex = Math.floor((top + height) / rowHeight);
+    const min = Math.floor(top / rowHeight);
+    const max = Math.floor((top + height) / rowHeight);
 
-    const minIndexOverscan = minIndex - overscan >= 0 ? minIndex - overscan : 0;
-    const maxIndexOverscan = maxIndex + overscan < length ? maxIndex + overscan : (length - 1);
+    const start = min - overscan >= 0 ? min - overscan : 0;
+    const end = max + overscan < length ? max + overscan : (length - 1);
 
-    this.setState({
-      start: minIndexOverscan,
-      end: maxIndexOverscan + 1,
-    });
+    this.setState({ start, end });
   }
 
   renderList = (className) => {

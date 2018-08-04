@@ -3,25 +3,18 @@ import PropTypes from 'prop-types';
 import range from 'lodash/range'
 import cn from 'classnames';
 
-import './list.css'
-
 class List extends Component {
-  handleRenderRow = index => {
+  handleRenderRow = (index) => {
     const { renderRow, rowHeight } = this.props;
-
-    return (
-      <div
-        key={index}
-        className="list-item"
-        style={{
-          height: `${rowHeight}px`,
-          top: index * rowHeight,
-          left: 0
-        }}
-      >
-        {renderRow(index)}
-      </div>
-    )
+    const style = {
+      position: 'absolute',
+      width: '100%',
+      height: `${rowHeight}px`,
+      top: index * rowHeight,
+      left: 0,
+      boxSizing: 'border-box',
+    }
+    return renderRow({ index, style });
   }
 
   render() {
@@ -36,9 +29,14 @@ class List extends Component {
       <div
         ref={forwardedRef}
         className={cn('list', className)}
-        style={{ height: `${height}px` }}
+        style={{
+          position: 'relative',
+          overflow: 'hidden',
+          height: `${height}px`,
+          boxSizing: 'border-box',
+        }}
       >
-        {range(start, end).map(this.handleRenderRow)}
+        {range(start, end + 1).map(this.handleRenderRow)}
       </div>
     );
   }

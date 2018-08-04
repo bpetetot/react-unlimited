@@ -1,9 +1,0 @@
-.list {
-  position: relative;
-  overflow: hidden;
-}
-
-.list-item {
-  position: absolute;
-  width: 100%;
-}

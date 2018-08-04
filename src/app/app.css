@@ -20,9 +20,8 @@
 }
 
 .cell {
-  position: relative;
   display: flex;
   align-items: center;
   border: 1px solid #ddd;
-  height: 100%;
+  padding: 5px;
 }
