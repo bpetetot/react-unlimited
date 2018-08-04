@@ -33,10 +33,7 @@ class App extends Component {
   render() {
     const { type, scrollToIndex } = this.state;
 
-    const items = range(0, 1000).map((id) => ({
-      id,
-      name: `item-${id}`
-    }));
+    const items = range(0, 1000).map((id) => ({ name: `item-${id}` }));
 
     return (
       <div className="app">
@@ -54,7 +51,6 @@ class App extends Component {
             rowHeight={50}
             renderRow={this.renderRow(items)}
             overscan={3}
-            scrollerRef={window}
             className="my-list"
             scrollWindow
             scrollToIndex={scrollToIndex}
@@ -67,7 +63,6 @@ class App extends Component {
             rowHeight={50}
             renderRow={this.renderRow(items)}
             overscan={3}
-            scrollerRef={window}
             className="my-list sized-list"
             scrollToIndex={scrollToIndex}
           />
