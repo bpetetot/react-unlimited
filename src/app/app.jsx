@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import range from "lodash/range";
+import range from 'lodash/range';
+import toNumber from 'lodash/toNumber'
 
-import Infinite from "./infinite";
+import Infinite from './infinite';
 
-import "./app.css";
+import './app.css';
 
 class App extends Component {
   state = {
@@ -16,7 +17,7 @@ class App extends Component {
   }
 
   scrollTo = e => {
-    this.setState({ scrollToIndex: e.target.value ? Number(e.target.value) : undefined })
+    this.setState({ scrollToIndex: toNumber(e.target.value) })
   }
 
   renderRow = items => ({ index, style }) => (

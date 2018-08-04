@@ -148,7 +148,10 @@ class Infinite extends Component {
       <div
         ref={this.scroller}
         className={className}
-        style={{ overflow: 'auto' }}
+        style={{
+          overflow: 'auto',
+          willChange: 'scroll-position',
+        }}
       >
         {this.renderList()}
       </div>
@@ -170,7 +173,7 @@ Infinite.defaultProps = {
   rowHeight: 0,
   overscan: 10,
   scrollWindow: false,
-  scrollToIndex: 0,
+  scrollToIndex: undefined,
 }
 
 export default Infinite;

@@ -13,6 +13,7 @@ class List extends Component {
       top: index * rowHeight,
       left: 0,
       boxSizing: 'border-box',
+      willChange: 'top',
     }
     return renderRow({ index, style });
   }
