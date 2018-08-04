@@ -59,8 +59,7 @@ class Infinite extends Component {
   scrollListener =  () => {
     if (!this.scrollTicking) {
       window.requestAnimationFrame(() => {
-        const { scrollTop } = this.getScrollerData();
-        this.updateListFromPosition(scrollTop);
+        this.updateListFromPosition();
         this.scrollTicking = false;
       });
     }
@@ -70,7 +69,7 @@ class Infinite extends Component {
   resizeListener = () => {
     if (!this.resizeTicking) {
       window.requestAnimationFrame(() => {
-        // this.updateListFromPosition(this.currentScrollTop);
+        this.updateListFromPosition();
         this.resizeTicking = false;
       });
     }
@@ -87,11 +86,9 @@ class Infinite extends Component {
     window.addEventListener('resize', this.resizeListener);
 
     if (scrollToIndex) {
-      const scrollTop = this.getIndexPosition(scrollToIndex)
-      this.updateListFromPosition(scrollTop);
       this.scrollToIndex(scrollToIndex);
     } else {
-      this.updateListFromIndex();
+      this.updateListFromPosition();
     }
   }
 
@@ -104,28 +101,23 @@ class Infinite extends Component {
 
   componentWillUnmount() {
     this.getScroller().removeEventListener('scroll', this.scrollListener);
+    window.removeEventListener('resize', this.resizeListener);
   }
 
-  updateListFromIndex = (index = 0) => {
-    const { length, rowHeight, overscan } = this.props;
-    const { scrollHeight } = this.getScrollerData();
-
-    const max = index + Math.floor(scrollHeight / rowHeight);
-
-    this.setState({
-      startIndex: index - overscan >= 0 ? index - overscan : 0,
-      endIndex: max + overscan < length ? max + overscan : (length - 1)
-    });
-  }
-
-  updateListFromPosition = (scrollTop) => {
-    const { scrollWindow, rowHeight } = this.props;
+  updateListFromPosition = () => {
+    const { length, overscan, scrollWindow, rowHeight } = this.props;
     const { current } = this.wrapper;
+    const { scrollTop, scrollHeight } = this.getScrollerData();
 
     const top = scrollWindow ? scrollTop - current.offsetTop : scrollTop;
-    const index = Math.floor(top / rowHeight);
 
-    this.updateListFromIndex(index);
+    const start = Math.floor(top / rowHeight);
+    const end = start + Math.floor(scrollHeight / rowHeight);
+
+    this.setState({
+      startIndex: start - overscan >= 0 ? start - overscan : 0,
+      endIndex: end + overscan < length ? end + overscan : (length - 1)
+    });
   }
 
   renderList = (className) => {
