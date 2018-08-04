@@ -20,8 +20,8 @@ class List extends Component {
   render() {
     const {
       forwardedRef,
-      start,
-      end,
+      startIndex,
+      endIndex,
       height,
       className
     } = this.props
@@ -36,7 +36,7 @@ class List extends Component {
           boxSizing: 'border-box',
         }}
       >
-        {range(start, end + 1).map(this.handleRenderRow)}
+        {range(startIndex, endIndex + 1).map(this.handleRenderRow)}
       </div>
     );
   }
@@ -44,8 +44,8 @@ class List extends Component {
 
 List.propTypes = {
   forwardedRef: PropTypes.any.isRequired,
-  start: PropTypes.number.isRequired,
-  end: PropTypes.number.isRequired,
+  startIndex: PropTypes.number.isRequired,
+  endIndex: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
   rowHeight: PropTypes.number.isRequired,
   renderRow: PropTypes.func.isRequired,

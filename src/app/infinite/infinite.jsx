@@ -5,8 +5,8 @@ import List from './list';
 
 class Infinite extends Component {
   state = {
-    start: 0,
-    end: 0,
+    startIndex: 0,
+    endIndex: 0,
   }
 
   wrapper = React.createRef();
@@ -32,11 +32,19 @@ class Infinite extends Component {
   }
 
   scrollTo = (index) => {
-    const { scrollWindow, rowHeight } = this.props;
+    const { scrollWindow, rowHeight, length } = this.props;
     const { current } = this.wrapper;
     const { scrollHeight } = this.getScrollData();
 
-    const top = index * rowHeight;
+    let top;
+    if (index < 0) {
+      top = index * rowHeight;
+    } else if (index >= length) {
+      top = (length - 1) * rowHeight;
+    } else {
+      top = index * rowHeight;
+    }
+
     this.updateList(top, scrollHeight - current.offsetTop);
 
     if (scrollWindow) {
@@ -46,27 +54,29 @@ class Infinite extends Component {
     }
   }
 
+  handleScroll =  (e) => {
+    const { current } = this.wrapper;
+    if (!this.ticking) {
+      window.requestAnimationFrame(() => {
+        const { scrollTop, scrollHeight } = this.getScrollData();
+        const top = scrollTop - current.offsetTop;
+        this.updateList(
+          top >= 0 ? top : 0,
+          top >= 0 ? scrollHeight : scrollHeight - current.offsetTop
+        );
+        this.ticking = false;
+      });
+    }
+    this.ticking = true;
+  }
+
   componentDidMount() {
     // first render of the list
     this.scrollTo(this.props.scrollToIndex || 0);
 
     // render on scroll
-    const { current } = this.wrapper;
-    let ticking = false;
-    this.listener = this.getScrollElement().addEventListener('scroll', (e) => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const { scrollTop, scrollHeight } = this.getScrollData();
-          const top = scrollTop - current.offsetTop;
-          this.updateList(
-            top >= 0 ? top : 0,
-            top >= 0 ? scrollHeight : scrollHeight - current.offsetTop
-          );
-          ticking = false;
-        });
-      }
-      ticking = true;
-    })
+    this.ticking = false;
+    this.listener = this.getScrollElement().addEventListener('scroll', this.handleScroll)
   }
 
   componentDidUpdate(prevProps) {
@@ -77,9 +87,7 @@ class Infinite extends Component {
   }
 
   componentWillUnmount() {
-    if (this.listener) {
-      this.getScrollElement().removeEventListener('scroll', this.listener);
-    }
+    this.getScrollElement().removeEventListener('scroll', this.handleScroll);
   }
 
   updateList = (top = 0, height) => {
@@ -88,21 +96,21 @@ class Infinite extends Component {
     const min = Math.floor(top / rowHeight);
     const max = Math.floor((top + height) / rowHeight);
 
-    const start = min - overscan >= 0 ? min - overscan : 0;
-    const end = max + overscan < length ? max + overscan : (length - 1);
+    const startIndex = min - overscan >= 0 ? min - overscan : 0;
+    const endIndex = max + overscan < length ? max + overscan : (length - 1);
 
-    this.setState({ start, end });
+    this.setState({ startIndex, endIndex });
   }
 
   renderList = (className) => {
     const { length, renderRow, rowHeight } = this.props;
-    const { start, end } = this.state;
+    const { startIndex, endIndex } = this.state;
 
     return (
       <List
         ref={this.wrapper}
-        start={start}
-        end={end}
+        startIndex={startIndex}
+        endIndex={endIndex}
         height={rowHeight * length}
         rowHeight={rowHeight}
         renderRow={renderRow}
