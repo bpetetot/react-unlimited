@@ -18,14 +18,17 @@ class List extends Component {
     return renderRow({ index, style });
   }
 
+  renderList = () => {
+    const { startIndex, endIndex } = this.props;
+    if (startIndex === -1 || endIndex === -1) {
+      return null;
+    }
+    return range(startIndex, endIndex + 1).map(this.handleRenderRow)
+  }
+
   render() {
-    const {
-      forwardedRef,
-      startIndex,
-      endIndex,
-      height,
-      className
-    } = this.props
+    const { forwardedRef, height, className } = this.props
+
     return (
       <div
         ref={forwardedRef}
@@ -37,7 +40,7 @@ class List extends Component {
           boxSizing: 'border-box',
         }}
       >
-        {range(startIndex, endIndex + 1).map(this.handleRenderRow)}
+        {this.renderList()}
       </div>
     );
   }

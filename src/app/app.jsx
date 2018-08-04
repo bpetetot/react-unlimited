@@ -8,8 +8,17 @@ import './app.css';
 
 class App extends Component {
   state = {
+    items: [],
     type: 'container',
     scrollToIndex: undefined,
+    loadMore: false,
+  }
+
+  createItems = (start, end) => range(start, end).map((id) => ({ name: `item-${id}` }))
+
+  componentDidMount() {
+    const items = this.createItems(1, 1000);
+    this.setState({ items })
   }
 
   select = type => () => {
@@ -18,6 +27,20 @@ class App extends Component {
 
   scrollTo = e => {
     this.setState({ scrollToIndex: toNumber(e.target.value) })
+  }
+
+  toggleLoadMore = () =>{
+    this.setState(state => ({ loadMore: !state.loadMore }))
+  }
+
+  handleLoadMore = () => {
+    this.setState(({ items }) => ({
+        items: [
+          ...items,
+          ...this.createItems(items.length, items.length + 200)
+        ]
+      }
+    ))
   }
 
   renderRow = items => ({ index, style }) => (
@@ -31,9 +54,8 @@ class App extends Component {
   )
 
   render() {
-    const { type, scrollToIndex } = this.state;
-
-    const items = range(0, 1000).map((id) => ({ name: `item-${id}` }));
+    const { type, scrollToIndex, loadMore } = this.state;
+    const { items } = this.state;
 
     return (
       <div className="app">
@@ -43,6 +65,8 @@ class App extends Component {
           <button onClick={this.select('container')}>Container scroll</button>
           <button onClick={this.select('window')}>Window scroll</button>
           <input type="text" placeholder="scrollTo" onChange={this.scrollTo} />
+          <input type="checkbox" onChange={this.toggleLoadMore} />
+          <label>Load more</label>
         </div>
 
         {type === 'window' && (
@@ -54,6 +78,7 @@ class App extends Component {
             className="my-list"
             scrollWindow
             scrollToIndex={scrollToIndex}
+            onLoadMore={loadMore ? this.handleLoadMore : undefined}
           />
         )}
 
@@ -65,6 +90,7 @@ class App extends Component {
             overscan={3}
             className="my-list sized-list"
             scrollToIndex={scrollToIndex}
+            onLoadMore={loadMore ? this.handleLoadMore : undefined}
           />
         )}
       </div>

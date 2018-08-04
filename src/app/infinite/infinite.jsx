@@ -5,8 +5,8 @@ import List from './list';
 
 class Infinite extends Component {
   state = {
-    startIndex: 0,
-    endIndex: 0,
+    startIndex: -1,
+    endIndex: -1,
   }
 
   wrapper = React.createRef();
@@ -59,7 +59,7 @@ class Infinite extends Component {
   scrollListener =  () => {
     if (!this.scrollTicking) {
       window.requestAnimationFrame(() => {
-        this.updateListFromPosition();
+        this.updateList();
         this.scrollTicking = false;
       });
     }
@@ -69,7 +69,7 @@ class Infinite extends Component {
   resizeListener = () => {
     if (!this.resizeTicking) {
       window.requestAnimationFrame(() => {
-        this.updateListFromPosition();
+        this.updateList();
         this.resizeTicking = false;
       });
     }
@@ -88,12 +88,15 @@ class Infinite extends Component {
     if (scrollToIndex) {
       this.scrollToIndex(scrollToIndex);
     } else {
-      this.updateListFromPosition();
+      this.updateList();
     }
   }
 
   componentDidUpdate(prevProps) {
-    const { scrollToIndex } = this.props;
+    const { scrollToIndex, length } = this.props;
+    if (length !== prevProps.length) {
+      this.updateList();
+    }
     if (scrollToIndex && scrollToIndex !== prevProps.scrollToIndex) {
       this.scrollToIndex(scrollToIndex);
     }
@@ -104,8 +107,15 @@ class Infinite extends Component {
     window.removeEventListener('resize', this.resizeListener);
   }
 
-  updateListFromPosition = () => {
-    const { length, overscan, scrollWindow, rowHeight } = this.props;
+  updateList = () => {
+    const {
+      length,
+      overscan,
+      scrollWindow,
+      rowHeight,
+      onLoadMore,
+    } = this.props;
+
     const { current } = this.wrapper;
     const { scrollTop, scrollHeight } = this.getScrollerData();
 
@@ -113,6 +123,10 @@ class Infinite extends Component {
 
     const start = Math.floor(top / rowHeight);
     const end = start + Math.floor(scrollHeight / rowHeight);
+
+    if (onLoadMore && end + overscan >= length) {
+      onLoadMore();
+    }
 
     this.setState({
       startIndex: start - overscan >= 0 ? start - overscan : 0,
@@ -166,6 +180,7 @@ Infinite.propTypes = {
   overscan: PropTypes.number,
   scrollWindow: PropTypes.bool,
   scrollToIndex: PropTypes.number,
+  onLoadMore: PropTypes.func,
 }
 
 Infinite.defaultProps = {
