@@ -7,6 +7,7 @@ class Infinite extends Component {
   state = {
     startIndex: -1,
     endIndex: -1,
+    isScrolling: false,
   }
 
   wrapper = React.createRef();
@@ -56,9 +57,26 @@ class Infinite extends Component {
     }
   }
 
+  checkIsScrolling = () => {
+    const { isScrolling } = this.state;
+
+    if (this.scrollingTimeout) {
+      clearTimeout(this.scrollingTimeout)
+    }
+
+    this.scrollingTimeout = setTimeout(() => {
+      this.setState({ isScrolling: false })
+    }, 100);
+
+    if (!isScrolling) {
+      this.setState({ isScrolling: true })
+    }
+  }
+
   scrollListener =  () => {
     if (!this.scrollTicking) {
       window.requestAnimationFrame(() => {
+        this.checkIsScrolling();
         this.updateList();
         this.scrollTicking = false;
       });
@@ -136,13 +154,14 @@ class Infinite extends Component {
 
   renderList = (className) => {
     const { length, renderRow, rowHeight } = this.props;
-    const { startIndex, endIndex } = this.state;
+    const { startIndex, endIndex, isScrolling } = this.state;
 
     return (
       <List
         ref={this.wrapper}
         startIndex={startIndex}
         endIndex={endIndex}
+        isScrolling={isScrolling}
         height={rowHeight * length}
         rowHeight={rowHeight}
         renderRow={renderRow}

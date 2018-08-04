@@ -5,7 +5,8 @@ import cn from 'classnames';
 
 class List extends Component {
   handleRenderRow = (index) => {
-    const { renderRow, rowHeight } = this.props;
+    const { renderRow, rowHeight, isScrolling } = this.props;
+
     const style = {
       position: 'absolute',
       width: '100%',
@@ -15,7 +16,7 @@ class List extends Component {
       boxSizing: 'border-box',
       willChange: 'top',
     }
-    return renderRow({ index, style });
+    return renderRow({ index, style, isScrolling });
   }
 
   renderList = () => {
@@ -50,6 +51,7 @@ List.propTypes = {
   forwardedRef: PropTypes.any.isRequired,
   startIndex: PropTypes.number.isRequired,
   endIndex: PropTypes.number.isRequired,
+  isScrolling: PropTypes.bool,
   height: PropTypes.number.isRequired,
   rowHeight: PropTypes.number.isRequired,
   renderRow: PropTypes.func.isRequired,
@@ -57,7 +59,7 @@ List.propTypes = {
 }
 
 List.defaultProps = {
-  height: 0,
+  isScrolling: false,
 }
 
 const ForwardRefList = (props, ref) => {

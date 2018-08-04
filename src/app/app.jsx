@@ -12,6 +12,7 @@ class App extends Component {
     type: 'container',
     scrollToIndex: undefined,
     loadMore: false,
+    showScrolling: false,
   }
 
   createItems = (start, end) => range(start, end).map((id) => ({ name: `item-${id}` }))
@@ -29,8 +30,8 @@ class App extends Component {
     this.setState({ scrollToIndex: toNumber(e.target.value) })
   }
 
-  toggleLoadMore = () =>{
-    this.setState(state => ({ loadMore: !state.loadMore }))
+  toggle = key => () =>{
+    this.setState(state => ({ [key]: !state[key] }))
   }
 
   handleLoadMore = () => {
@@ -43,15 +44,19 @@ class App extends Component {
     ))
   }
 
-  renderRow = items => ({ index, style }) => (
-    <div
-      key={index}
-      className="cell"
-      style={style}
-    >
-      {items[index].name}
-    </div>
-  )
+  renderRow = items => ({ index, style, isScrolling }) => {
+    const { showScrolling } = this.state;
+    return (
+      <div
+        key={index}
+        className="cell"
+        style={style}
+      >
+        {items[index].name}
+        {showScrolling && isScrolling ? ' is scrolling...' : null}
+      </div>
+    )
+  }
 
   render() {
     const { type, scrollToIndex, loadMore } = this.state;
@@ -65,8 +70,10 @@ class App extends Component {
           <button onClick={this.select('container')}>Container scroll</button>
           <button onClick={this.select('window')}>Window scroll</button>
           <input type="text" placeholder="scrollTo" onChange={this.scrollTo} />
-          <input type="checkbox" onChange={this.toggleLoadMore} />
+          <input type="checkbox" onChange={this.toggle('loadMore')} />
           <label>Load more</label>
+          <input type="checkbox" onChange={this.toggle('showScrolling')} />
+          <label>Show scrolling</label>
         </div>
 
         {type === 'window' && (
