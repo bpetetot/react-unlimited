@@ -50,13 +50,13 @@ class Infinite extends Component {
     const top = this.getIndexPosition(index);
 
     if (scrollWindow) {
-      return window.scrollTo(0, top); // FIXME doesnt work when updating
+      setTimeout(() => window.scrollTo(0, top));
     } else {
-      return this.scroller.current.scrollTop = top;
+      this.scroller.current.scrollTop = top;
     }
   }
 
-  handleScroll =  () => {
+  scrollListener =  () => {
     if (!this.ticking) {
       window.requestAnimationFrame(() => {
         const { scrollTop } = this.getScrollerData();
@@ -71,11 +71,11 @@ class Infinite extends Component {
     const { scrollToIndex } = this.props;
 
     this.ticking = false;
-    this.getScroller().addEventListener('scroll', this.handleScroll)
+    this.getScroller().addEventListener('scroll', this.scrollListener);
 
     this.updateListFromIndex(scrollToIndex || 0);
     if (scrollToIndex) {
-      this.updateListFromIndex(scrollToIndex);
+      this.scrollToIndex(scrollToIndex);
     }
   }
 
@@ -87,7 +87,7 @@ class Infinite extends Component {
   }
 
   componentWillUnmount() {
-    this.getScroller().removeEventListener('scroll', this.handleScroll);
+    this.getScroller().removeEventListener('scroll', this.scrollListener);
   }
 
   updateListFromIndex = (index) => {
