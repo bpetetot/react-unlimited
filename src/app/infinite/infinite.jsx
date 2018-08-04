@@ -1,15 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import range from 'lodash/range';
 
 import List from './list';
 
-import './infinite.css';
-
 class Infinite extends Component {
   state = {
-    itemsWindow: [],
-    itemsIndexes: [],
+    start: 0,
+    end: 0,
   }
 
   wrapper = React.createRef();
@@ -86,48 +83,34 @@ class Infinite extends Component {
   }
 
   updateList = (top = 0, height) => {
-    const { items, rowHeight, overscan } = this.props;
+    const { length, rowHeight, overscan } = this.props;
 
     const minIndex = Math.floor(top / rowHeight);
     const maxIndex = Math.floor((top + height) / rowHeight);
 
     const minIndexOverscan = minIndex - overscan >= 0 ? minIndex - overscan : 0;
-    const maxIndexOverscan = maxIndex + overscan < items.length ? maxIndex + overscan : (items.length - 1);
+    const maxIndexOverscan = maxIndex + overscan < length ? maxIndex + overscan : (length - 1);
 
     this.setState({
-      itemsWindow: items.slice(minIndexOverscan, maxIndexOverscan + 1),
-      itemsIndexes: range(minIndexOverscan, maxIndexOverscan + 1),
+      start: minIndexOverscan,
+      end: maxIndexOverscan + 1,
     });
   }
 
   renderList = (className) => {
-    const { items, rowHeight } = this.props;
-    const { itemsWindow } = this.state;
+    const { length, renderRow, rowHeight } = this.props;
+    const { start, end } = this.state;
 
     return (
       <List
         ref={this.wrapper}
-        items={itemsWindow}
-        height={rowHeight * items.length}
-        renderItem={this.renderItem}
+        start={start}
+        end={end}
+        height={rowHeight * length}
+        rowHeight={rowHeight}
+        renderRow={renderRow}
         className={className}
       />
-    )
-  }
-
-  renderItem = ({ id, name }, index) => {
-    const { rowHeight } = this.props;
-    const { itemsIndexes } = this.state;
-    const height = `${rowHeight}px`;
-    const top = itemsIndexes[index] * rowHeight;
-    return (
-      <div
-        key={id}
-        className="infinite-list-item"
-        style={{ height, top, left: 0 }}
-      >
-        {name}
-      </div>
     )
   }
 
@@ -151,15 +134,16 @@ class Infinite extends Component {
 }
 
 Infinite.propTypes = {
-  items: PropTypes.array,
-  rowHeight: PropTypes.number,
+  length: PropTypes.number.isRequired,
+  rowHeight: PropTypes.number.isRequired,
+  renderRow: PropTypes.func.isRequired,
   overscan: PropTypes.number,
   scrollWindow: PropTypes.bool,
   scrollToIndex: PropTypes.number,
 }
 
 Infinite.defaultProps = {
-  items: [],
+  length: 0,
   rowHeight: 0,
   overscan: 10,
   scrollWindow: false,

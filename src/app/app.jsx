@@ -11,9 +11,13 @@ class App extends Component {
     scrollToIndex: undefined,
   }
 
-  select = type => () => this.setState({ type })
+  select = type => () => {
+    this.setState({ type })
+  }
 
-  scrollTo = e => this.setState({ scrollToIndex: e.target.value ? Number(e.target.value) : undefined })
+  scrollTo = e => {
+    this.setState({ scrollToIndex: e.target.value ? Number(e.target.value) : undefined })
+  }
 
   render() {
     const { type, scrollToIndex } = this.state;
@@ -33,8 +37,9 @@ class App extends Component {
 
         {type === 'window' && (
           <Infinite
-            items={items}
+            length={items.length}
             rowHeight={50}
+            renderRow={index => <div className="cell">{items[index].name}</div>}
             overscan={3}
             scrollerRef={window}
             className="my-list"
@@ -45,8 +50,9 @@ class App extends Component {
 
         {type === 'container' && (
           <Infinite
-            items={items}
+            length={items.length}
             rowHeight={50}
+            renderRow={index => <div className="cell">{items[index].name}</div>}
             overscan={3}
             scrollerRef={window}
             className="my-list sized-list"
