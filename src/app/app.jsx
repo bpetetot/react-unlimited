@@ -39,6 +39,8 @@ class App extends Component {
 
     return (
       <div className="app">
+        <h1>Infinite list</h1>
+
         <div className="toolbar">
           <button onClick={this.select('container')}>Container scroll</button>
           <button onClick={this.select('window')}>Window scroll</button>

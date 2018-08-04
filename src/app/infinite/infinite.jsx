@@ -10,60 +10,57 @@ class Infinite extends Component {
   }
 
   wrapper = React.createRef();
-  scrollContainer = React.createRef();
+  scroller = React.createRef();
 
-  getScrollElement = () => {
+  getScroller = () => {
     const { scrollWindow } = this.props;
+    const { current } = this.scroller;
 
-    if (scrollWindow) {
-      return window
-    } else {
-      return this.scrollContainer.current
-    }
+    return scrollWindow ? window : current;
   }
 
-  getScrollData = () => {
+  getScrollerData = () => {
     const { scrollWindow } = this.props;
+    const { current } = this.scroller;
 
     return {
-      scrollTop: scrollWindow ? window.scrollY : this.scrollContainer.current.scrollTop,
-      scrollHeight: scrollWindow ? window.innerHeight : this.scrollContainer.current.clientHeight,
+      scrollTop: scrollWindow ? window.scrollY : current.scrollTop,
+      scrollHeight: scrollWindow ? window.innerHeight : current.clientHeight,
     }
   }
 
-  scrollTo = (index) => {
+  getIndexPosition = (index) => {
     const { scrollWindow, rowHeight, length } = this.props;
     const { current } = this.wrapper;
-    const { scrollHeight } = this.getScrollData();
 
-    let top;
+    const offsetTop = scrollWindow ? current.offsetTop : 0;
+
     if (index < 0) {
-      top = index * rowHeight;
+      return offsetTop;
     } else if (index >= length) {
-      top = (length - 1) * rowHeight;
+      return ((length - 1) * rowHeight) + offsetTop;
     } else {
-      top = index * rowHeight;
-    }
-
-    this.updateList(top, scrollHeight - current.offsetTop);
-
-    if (scrollWindow) {
-      return window.scrollTo({ top }); // FIXME doesnt work when updating
-    } else {
-      return this.scrollContainer.current.scrollTop = top;
+      return (index * rowHeight) + offsetTop;
     }
   }
 
-  handleScroll =  (e) => {
-    const { current } = this.wrapper;
+  scrollToIndex = (index) => {
+    const { scrollWindow } = this.props;
+
+    const top = this.getIndexPosition(index);
+
+    if (scrollWindow) {
+      return window.scrollTo(0, top); // FIXME doesnt work when updating
+    } else {
+      return this.scroller.current.scrollTop = top;
+    }
+  }
+
+  handleScroll =  () => {
     if (!this.ticking) {
       window.requestAnimationFrame(() => {
-        const { scrollTop, scrollHeight } = this.getScrollData();
-        const top = scrollTop - current.offsetTop;
-        this.updateList(
-          top >= 0 ? top : 0,
-          top >= 0 ? scrollHeight : scrollHeight - current.offsetTop
-        );
+        const { scrollTop } = this.getScrollerData();
+        this.updateListFromPosition(scrollTop);
         this.ticking = false;
       });
     }
@@ -71,35 +68,48 @@ class Infinite extends Component {
   }
 
   componentDidMount() {
-    // first render of the list
-    this.scrollTo(this.props.scrollToIndex || 0);
+    const { scrollToIndex } = this.props;
 
-    // render on scroll
     this.ticking = false;
-    this.listener = this.getScrollElement().addEventListener('scroll', this.handleScroll)
+    this.getScroller().addEventListener('scroll', this.handleScroll)
+
+    this.updateListFromIndex(scrollToIndex || 0);
+    if (scrollToIndex) {
+      this.updateListFromIndex(scrollToIndex);
+    }
   }
 
   componentDidUpdate(prevProps) {
     const { scrollToIndex } = this.props;
     if (scrollToIndex && scrollToIndex !== prevProps.scrollToIndex) {
-      this.scrollTo(scrollToIndex);
+      this.scrollToIndex(scrollToIndex);
     }
   }
 
   componentWillUnmount() {
-    this.getScrollElement().removeEventListener('scroll', this.handleScroll);
+    this.getScroller().removeEventListener('scroll', this.handleScroll);
   }
 
-  updateList = (top = 0, height) => {
+  updateListFromIndex = (index) => {
     const { length, rowHeight, overscan } = this.props;
+    const { scrollHeight } = this.getScrollerData();
 
-    const min = Math.floor(top / rowHeight);
-    const max = Math.floor((top + height) / rowHeight);
+    const max = index + Math.floor(scrollHeight / rowHeight);
 
-    const startIndex = min - overscan >= 0 ? min - overscan : 0;
-    const endIndex = max + overscan < length ? max + overscan : (length - 1);
+    this.setState({
+      startIndex: index - overscan >= 0 ? index - overscan : 0,
+      endIndex: max + overscan < length ? max + overscan : (length - 1)
+    });
+  }
 
-    this.setState({ startIndex, endIndex });
+  updateListFromPosition = (scrollTop = 0) => {
+    const { scrollWindow, rowHeight } = this.props;
+    const { current } = this.wrapper;
+
+    const top = scrollWindow ? scrollTop - current.offsetTop : scrollTop;
+    const index = Math.floor(top / rowHeight);
+
+    this.updateListFromIndex(index);
   }
 
   renderList = (className) => {
@@ -128,7 +138,7 @@ class Infinite extends Component {
 
     return (
       <div
-        ref={this.scrollContainer}
+        ref={this.scroller}
         className={className}
         style={{ overflow: 'auto' }}
       >
