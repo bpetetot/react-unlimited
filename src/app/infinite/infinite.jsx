@@ -57,25 +57,41 @@ class Infinite extends Component {
   }
 
   scrollListener =  () => {
-    if (!this.ticking) {
+    if (!this.scrollTicking) {
       window.requestAnimationFrame(() => {
         const { scrollTop } = this.getScrollerData();
         this.updateListFromPosition(scrollTop);
-        this.ticking = false;
+        this.scrollTicking = false;
       });
     }
-    this.ticking = true;
+    this.scrollTicking = true;
+  }
+
+  resizeListener = () => {
+    if (!this.resizeTicking) {
+      window.requestAnimationFrame(() => {
+        // this.updateListFromPosition(this.currentScrollTop);
+        this.resizeTicking = false;
+      });
+    }
+    this.resizeTicking = true;
   }
 
   componentDidMount() {
     const { scrollToIndex } = this.props;
 
-    this.ticking = false;
+    this.scrollTicking = false;
     this.getScroller().addEventListener('scroll', this.scrollListener);
 
-    this.updateListFromIndex(scrollToIndex || 0);
+    this.resizeTicking = false;
+    window.addEventListener('resize', this.resizeListener);
+
     if (scrollToIndex) {
+      const scrollTop = this.getIndexPosition(scrollToIndex)
+      this.updateListFromPosition(scrollTop);
       this.scrollToIndex(scrollToIndex);
+    } else {
+      this.updateListFromIndex();
     }
   }
 
@@ -90,7 +106,7 @@ class Infinite extends Component {
     this.getScroller().removeEventListener('scroll', this.scrollListener);
   }
 
-  updateListFromIndex = (index) => {
+  updateListFromIndex = (index = 0) => {
     const { length, rowHeight, overscan } = this.props;
     const { scrollHeight } = this.getScrollerData();
 
@@ -102,7 +118,7 @@ class Infinite extends Component {
     });
   }
 
-  updateListFromPosition = (scrollTop = 0) => {
+  updateListFromPosition = (scrollTop) => {
     const { scrollWindow, rowHeight } = this.props;
     const { current } = this.wrapper;
 
