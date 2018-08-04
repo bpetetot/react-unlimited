@@ -17,7 +17,7 @@ class App extends Component {
   createItems = (start, end) => range(start, end).map((id) => ({ name: `item-${id}` }))
 
   componentDidMount() {
-    const items = this.createItems(1, 1000);
+    const items = this.createItems(0, 100);
     this.setState({ items })
   }
 
@@ -37,7 +37,7 @@ class App extends Component {
     this.setState(({ items }) => ({
         items: [
           ...items,
-          ...this.createItems(items.length, items.length + 200)
+          ...this.createItems(items.length, items.length + 50)
         ]
       }
     ))
