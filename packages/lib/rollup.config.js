@@ -10,7 +10,7 @@ export default {
   input: 'src/index.js',
   output: {
     name: pkg.name,
-    file: `build/index.${process.env.FORMAT}.js`,
+    file: `dist/index.${process.env.FORMAT}.js`,
     format: process.env.FORMAT,
     sourcemap: false,
     globals: {
