@@ -1,28 +1,60 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 
-import List from './list';
+import List from './list'
 
 class Infinite extends Component {
+  wrapper = React.createRef();
+
+  scroller = React.createRef();
+
   state = {
     startIndex: -1,
     endIndex: -1,
     isScrolling: false,
   }
 
-  wrapper = React.createRef();
-  scroller = React.createRef();
+  componentDidMount() {
+    const { scrollToIndex } = this.props
+
+    this.scrollTicking = false
+    this.getScroller().addEventListener('scroll', this.scrollListener)
+
+    this.resizeTicking = false
+    window.addEventListener('resize', this.resizeListener)
+
+    if (scrollToIndex) {
+      this.scrollToIndex(scrollToIndex)
+    } else {
+      this.updateList()
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    const { scrollToIndex, length } = this.props
+    if (length !== prevProps.length) {
+      this.updateList()
+    }
+    if (scrollToIndex && scrollToIndex !== prevProps.scrollToIndex) {
+      this.scrollToIndex(scrollToIndex)
+    }
+  }
+
+  componentWillUnmount() {
+    this.getScroller().removeEventListener('scroll', this.scrollListener)
+    window.removeEventListener('resize', this.resizeListener)
+  }
 
   getScroller = () => {
-    const { scrollWindow } = this.props;
-    const { current } = this.scroller;
+    const { scrollWindow } = this.props
+    const { current } = this.scroller
 
-    return scrollWindow ? window : current;
+    return scrollWindow ? window : current
   }
 
   getScrollerData = () => {
-    const { scrollWindow } = this.props;
-    const { current } = this.scroller;
+    const { scrollWindow } = this.props
+    const { current } = this.scroller
 
     return {
       scrollTop: scrollWindow ? window.scrollY : current.scrollTop,
@@ -31,34 +63,33 @@ class Infinite extends Component {
   }
 
   getIndexPosition = (index) => {
-    const { scrollWindow, rowHeight, length } = this.props;
-    const { current } = this.wrapper;
+    const { scrollWindow, rowHeight, length } = this.props
+    const { current } = this.wrapper
 
-    const offsetTop = scrollWindow ? current.offsetTop : 0;
+    const offsetTop = scrollWindow ? current.offsetTop : 0
 
     if (index < 0) {
-      return offsetTop;
-    } else if (index >= length) {
-      return ((length - 1) * rowHeight) + offsetTop;
-    } else {
-      return (index * rowHeight) + offsetTop;
+      return offsetTop
+    } if (index >= length) {
+      return ((length - 1) * rowHeight) + offsetTop
     }
+    return (index * rowHeight) + offsetTop
   }
 
   scrollToIndex = (index) => {
-    const { scrollWindow } = this.props;
+    const { scrollWindow } = this.props
 
-    const top = this.getIndexPosition(index);
+    const top = this.getIndexPosition(index)
 
     if (scrollWindow) {
-      setTimeout(() => window.scrollTo(0, top));
+      setTimeout(() => window.scrollTo(0, top))
     } else {
-      this.scroller.current.scrollTop = top;
+      this.scroller.current.scrollTop = top
     }
   }
 
   checkIsScrolling = () => {
-    const { isScrolling } = this.state;
+    const { isScrolling } = this.state
 
     if (this.scrollingTimeout) {
       clearTimeout(this.scrollingTimeout)
@@ -66,63 +97,32 @@ class Infinite extends Component {
 
     this.scrollingTimeout = setTimeout(() => {
       this.setState({ isScrolling: false })
-    }, 100);
+    }, 100)
 
     if (!isScrolling) {
       this.setState({ isScrolling: true })
     }
   }
 
-  scrollListener =  () => {
+  scrollListener = () => {
     if (!this.scrollTicking) {
       window.requestAnimationFrame(() => {
-        this.checkIsScrolling();
-        this.updateList();
-        this.scrollTicking = false;
-      });
+        this.checkIsScrolling()
+        this.updateList()
+        this.scrollTicking = false
+      })
     }
-    this.scrollTicking = true;
+    this.scrollTicking = true
   }
 
   resizeListener = () => {
     if (!this.resizeTicking) {
       window.requestAnimationFrame(() => {
-        this.updateList();
-        this.resizeTicking = false;
-      });
+        this.updateList()
+        this.resizeTicking = false
+      })
     }
-    this.resizeTicking = true;
-  }
-
-  componentDidMount() {
-    const { scrollToIndex } = this.props;
-
-    this.scrollTicking = false;
-    this.getScroller().addEventListener('scroll', this.scrollListener);
-
-    this.resizeTicking = false;
-    window.addEventListener('resize', this.resizeListener);
-
-    if (scrollToIndex) {
-      this.scrollToIndex(scrollToIndex);
-    } else {
-      this.updateList();
-    }
-  }
-
-  componentDidUpdate(prevProps) {
-    const { scrollToIndex, length } = this.props;
-    if (length !== prevProps.length) {
-      this.updateList();
-    }
-    if (scrollToIndex && scrollToIndex !== prevProps.scrollToIndex) {
-      this.scrollToIndex(scrollToIndex);
-    }
-  }
-
-  componentWillUnmount() {
-    this.getScroller().removeEventListener('scroll', this.scrollListener);
-    window.removeEventListener('resize', this.resizeListener);
+    this.resizeTicking = true
   }
 
   updateList = () => {
@@ -132,29 +132,29 @@ class Infinite extends Component {
       scrollWindow,
       rowHeight,
       onLoadMore,
-    } = this.props;
+    } = this.props
 
-    const { current } = this.wrapper;
-    const { scrollTop, scrollHeight } = this.getScrollerData();
+    const { current } = this.wrapper
+    const { scrollTop, scrollHeight } = this.getScrollerData()
 
-    const top = scrollWindow ? scrollTop - current.offsetTop : scrollTop;
+    const top = scrollWindow ? scrollTop - current.offsetTop : scrollTop
 
-    const start = Math.floor(top / rowHeight);
-    const end = start + Math.floor(scrollHeight / rowHeight);
+    const start = Math.floor(top / rowHeight)
+    const end = start + Math.floor(scrollHeight / rowHeight)
 
     if (onLoadMore && end + overscan >= length) {
-      onLoadMore();
+      onLoadMore()
     }
 
     this.setState({
       startIndex: start - overscan >= 0 ? start - overscan : 0,
-      endIndex: end + overscan < length ? end + overscan : (length - 1)
-    });
+      endIndex: end + overscan < length ? end + overscan : (length - 1),
+    })
   }
 
   renderList = (className) => {
-    const { length, renderRow, rowHeight } = this.props;
-    const { startIndex, endIndex, isScrolling } = this.state;
+    const { length, renderRow, rowHeight } = this.props
+    const { startIndex, endIndex, isScrolling } = this.state
 
     return (
       <List
@@ -171,10 +171,10 @@ class Infinite extends Component {
   }
 
   render() {
-    const { scrollWindow, className } = this.props;
+    const { scrollWindow, className } = this.props
 
     if (scrollWindow) {
-      return this.renderList(className);
+      return this.renderList(className)
     }
 
     return (
@@ -200,14 +200,15 @@ Infinite.propTypes = {
   scrollWindow: PropTypes.bool,
   scrollToIndex: PropTypes.number,
   onLoadMore: PropTypes.func,
+  className: PropTypes.string,
 }
 
 Infinite.defaultProps = {
-  length: 0,
-  rowHeight: 0,
   overscan: 10,
   scrollWindow: false,
   scrollToIndex: undefined,
+  onLoadMore: undefined,
+  className: undefined,
 }
 
-export default Infinite;
+export default Infinite

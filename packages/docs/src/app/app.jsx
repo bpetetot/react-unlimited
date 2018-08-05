@@ -1,10 +1,10 @@
-import React, { Component } from 'react';
-import range from 'lodash/range';
+import React, { Component } from 'react'
+import range from 'lodash/range'
 import toNumber from 'lodash/toNumber'
 
-import Infinite from 'infinite-list';
+import Infinite from 'infinite-list'
 
-import './app.css';
+import './app.css'
 
 class App extends Component {
   state = {
@@ -15,37 +15,37 @@ class App extends Component {
     showScrolling: false,
   }
 
-  createItems = (start, end) => range(start, end).map((id) => ({ name: `item-${id}` }))
-
   componentDidMount() {
-    const items = this.createItems(0, 100);
+    const items = this.createItems(0, 100)
     this.setState({ items })
   }
+
+  createItems = (start, end) => range(start, end).map(id => ({ name: `item-${id}` }))
 
   select = type => () => {
     this.setState({ type })
   }
 
-  scrollTo = e => {
+  scrollTo = (e) => {
     this.setState({ scrollToIndex: toNumber(e.target.value) })
   }
 
-  toggle = key => () =>{
+  toggle = key => () => {
     this.setState(state => ({ [key]: !state[key] }))
   }
 
   handleLoadMore = () => {
     this.setState(({ items }) => ({
-        items: [
-          ...items,
-          ...this.createItems(items.length, items.length + 50)
-        ]
-      }
+      items: [
+        ...items,
+        ...this.createItems(items.length, items.length + 50),
+      ],
+    }
     ))
   }
 
   renderRow = items => ({ index, style, isScrolling }) => {
-    const { showScrolling } = this.state;
+    const { showScrolling } = this.state
     return (
       <div
         key={index}
@@ -59,21 +59,25 @@ class App extends Component {
   }
 
   render() {
-    const { type, scrollToIndex, loadMore } = this.state;
-    const { items } = this.state;
+    const { type, scrollToIndex, loadMore } = this.state
+    const { items } = this.state
 
     return (
       <div className="app">
         <h1>Infinite list</h1>
 
         <div className="toolbar">
-          <button onClick={this.select('container')}>Container scroll</button>
-          <button onClick={this.select('window')}>Window scroll</button>
+          <button type="button" onClick={this.select('container')}>
+            Container scroll
+          </button>
+          <button type="button" onClick={this.select('window')}>
+            Window scroll
+          </button>
           <input type="text" placeholder="scrollTo" onChange={this.scrollTo} />
           <input type="checkbox" onChange={this.toggle('loadMore')} />
-          <label>Load more</label>
+          <span>Load more</span>
           <input type="checkbox" onChange={this.toggle('showScrolling')} />
-          <label>Show scrolling</label>
+          <span>Show scrolling</span>
         </div>
 
         {type === 'window' && (
@@ -101,8 +105,8 @@ class App extends Component {
           />
         )}
       </div>
-    );
+    )
   }
 }
 
-export default App;
+export default App

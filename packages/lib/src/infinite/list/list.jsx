@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import range from 'lodash/range'
-import cn from 'classnames';
+import cn from 'classnames'
 
 class List extends Component {
   handleRenderRow = (index) => {
-    const { renderRow, rowHeight, isScrolling } = this.props;
+    const { renderRow, rowHeight, isScrolling } = this.props
 
     const style = {
       position: 'absolute',
@@ -16,13 +16,13 @@ class List extends Component {
       boxSizing: 'border-box',
       willChange: 'top',
     }
-    return renderRow({ index, style, isScrolling });
+    return renderRow({ index, style, isScrolling })
   }
 
   renderList = () => {
-    const { startIndex, endIndex } = this.props;
+    const { startIndex, endIndex } = this.props
     if (startIndex === -1 || endIndex === -1) {
-      return null;
+      return null
     }
     return range(startIndex, endIndex + 1).map(this.handleRenderRow)
   }
@@ -43,7 +43,7 @@ class List extends Component {
       >
         {this.renderList()}
       </div>
-    );
+    )
   }
 }
 
@@ -60,10 +60,9 @@ List.propTypes = {
 
 List.defaultProps = {
   isScrolling: false,
+  className: undefined,
 }
 
-const ForwardRefList = (props, ref) => {
-  return <List {...props} forwardedRef={ref} />;
-}
+const ForwardRefList = (props, ref) => <List {...props} forwardedRef={ref} />
 
-export default React.forwardRef(ForwardRefList);
+export default React.forwardRef(ForwardRefList)

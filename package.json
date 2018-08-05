@@ -3,5 +3,45 @@
   "workspaces": [
     "packages/lib",
     "packages/docs"
+  ],
+  "scripts": {
+    "lint": "eslint . --ext js,jsx"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.2.6",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb": "17.0.0",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.9.1"
+  },
+  "eslintConfig": {
+    "parser": "babel-eslint",
+    "extends": [
+      "airbnb"
+    ],
+    "env": {
+      "browser": true
+    },
+    "rules": {
+      "import/no-extraneous-dependencies": "off",
+      "react/forbid-prop-types": "off",
+      "react/jsx-one-expression-per-line": "off",
+      "operator-linebreak": "off",
+      "max-len": [
+        2,
+        200
+      ],
+      "semi": [
+        2,
+        "never"
+      ]
+    }
+  },
+  "eslintIgnore": [
+    "**/node_modules/",
+    "**/build/",
+    "**/coverage/",
+    "**/public/"
   ]
 }
