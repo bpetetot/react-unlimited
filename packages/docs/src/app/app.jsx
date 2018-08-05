@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import range from 'lodash/range';
 import toNumber from 'lodash/toNumber'
 
-import Infinite from './infinite';
+import Infinite from 'infinite-list';
 
 import './app.css';
 

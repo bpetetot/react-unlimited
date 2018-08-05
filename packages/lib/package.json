@@ -1,0 +1,69 @@
+{
+  "name": "infinite-list",
+  "version": "0.1.0",
+  "main": "build/index.umd.js",
+  "module": "build/index.es.js",
+  "repository": "git@github.com:bpetetot/infinite-test.git",
+  "author": "Benjamin Petetot <bpetetot@gmail.com>",
+  "license": "MIT",
+  "files": [
+    "build",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "jest src/*",
+    "build": "npm-run-all --parallel build:*",
+    "build:es": "cross-env FORMAT=es rollup -c",
+    "build:umd": "cross-env FORMAT=umd rollup -c",
+    "prepublishOnly": "yarn build"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-jest": "^23.4.0",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "classnames": "^2.2.6",
+    "cross-env": "^5.2.0",
+    "jest": "^23.4.1",
+    "lodash": "^4.17.10",
+    "npm-run-all": "^4.1.3",
+    "prop-types": "^15.6.2",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
+    "rollup": "^0.63.5",
+    "rollup-plugin-babel": "^3.0.7",
+    "rollup-plugin-commonjs": "^9.1.4",
+    "rollup-plugin-sourcemaps": "^0.4.2",
+    "rollup-plugin-terser": "^1.0.1"
+  },
+  "peerDependencies": {
+    "classnames": "2.x",
+    "lodash": "4.x",
+    "prop-types": "15.x",
+    "react": "16.x"
+  },
+  "jest": {
+    "coverageDirectory": "./coverage/"
+  },
+  "babel": {
+    "presets": [
+      [
+        "env",
+        {
+          "modules": false
+        }
+      ],
+      "react"
+    ],
+    "plugins": [
+      "external-helpers",
+      "transform-class-properties",
+      "transform-react-jsx",
+      "transform-object-rest-spread"
+    ]
+  }
+}
