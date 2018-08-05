@@ -5,7 +5,7 @@ jobs:
       - image: circleci/node:9
     steps:
       - checkout:
-          path: https://github.com/bpetetot/react-unlimited.git
+          path: git@github.com:bpetetot/react-unlimited.git
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "yarn.lock" }}
