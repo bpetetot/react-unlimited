@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 import List from './list'
 
-class Infinite extends Component {
+class Unlimited extends Component {
   wrapper = React.createRef();
 
   scroller = React.createRef();
@@ -192,7 +192,7 @@ class Infinite extends Component {
   }
 }
 
-Infinite.propTypes = {
+Unlimited.propTypes = {
   length: PropTypes.number.isRequired,
   rowHeight: PropTypes.number.isRequired,
   renderRow: PropTypes.func.isRequired,
@@ -203,7 +203,7 @@ Infinite.propTypes = {
   className: PropTypes.string,
 }
 
-Infinite.defaultProps = {
+Unlimited.defaultProps = {
   overscan: 10,
   scrollWindow: false,
   scrollToIndex: undefined,
@@ -211,4 +211,4 @@ Infinite.defaultProps = {
   className: undefined,
 }
 
-export default Infinite
+export default Unlimited

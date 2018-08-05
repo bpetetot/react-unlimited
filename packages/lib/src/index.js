@@ -1,1 +1,1 @@
-export { default } from './infinite'
+export { default } from './unlimited'

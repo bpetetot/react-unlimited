@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import range from 'lodash/range'
 import toNumber from 'lodash/toNumber'
 
-import Infinite from 'infinite-list'
+import UnlimitedList from 'react-unlimited'
 
 import './app.css'
 
@@ -11,7 +11,7 @@ class App extends Component {
     items: [],
     type: 'container',
     scrollToIndex: undefined,
-    loadMore: false,
+    loadMore: true,
     showScrolling: false,
   }
 
@@ -64,7 +64,7 @@ class App extends Component {
 
     return (
       <div className="app">
-        <h1>Infinite list</h1>
+        <h1>Unlimited list</h1>
 
         <div className="toolbar">
           <button type="button" onClick={this.select('container')}>
@@ -81,7 +81,7 @@ class App extends Component {
         </div>
 
         {type === 'window' && (
-          <Infinite
+          <UnlimitedList
             length={items.length}
             rowHeight={50}
             renderRow={this.renderRow(items)}
@@ -94,7 +94,7 @@ class App extends Component {
         )}
 
         {type === 'container' && (
-          <Infinite
+          <UnlimitedList
             length={items.length}
             rowHeight={50}
             renderRow={this.renderRow(items)}

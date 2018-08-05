@@ -1,1 +1,1 @@
-# Infinite list
+# react-unlimited
