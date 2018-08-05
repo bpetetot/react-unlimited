@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import range from 'lodash/range'
-import cn from 'classnames'
+import { range } from '../utils'
 
 class List extends Component {
   handleRenderRow = (index) => {
@@ -33,7 +32,7 @@ class List extends Component {
     return (
       <div
         ref={forwardedRef}
-        className={cn('list', className)}
+        className={className}
         style={{
           position: 'relative',
           overflow: 'hidden',
