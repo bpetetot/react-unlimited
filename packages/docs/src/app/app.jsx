@@ -20,6 +20,10 @@ class App extends Component {
     this.setState({ items })
   }
 
+  setContainerRef = (ref) => {
+    this.containerRef = ref
+  }
+
   createItems = (start, end) => range(start, end).map(id => ({ name: `item-${id}` }))
 
   select = type => () => {
@@ -36,22 +40,14 @@ class App extends Component {
 
   handleLoadMore = () => {
     this.setState(({ items }) => ({
-      items: [
-        ...items,
-        ...this.createItems(items.length, items.length + 50),
-      ],
-    }
-    ))
+      items: [...items, ...this.createItems(items.length, items.length + 50)],
+    }))
   }
 
   renderRow = items => ({ index, style, isScrolling }) => {
     const { showScrolling } = this.state
     return (
-      <div
-        key={index}
-        className="cell"
-        style={style}
-      >
+      <div key={index} className="cell" style={style}>
         {items[index].name}
         {showScrolling && isScrolling ? ' is scrolling...' : null}
       </div>
@@ -60,8 +56,9 @@ class App extends Component {
 
   render() {
     const { type, scrollToIndex, infiniteLoad } = this.state
-    const { items } = this.state
 
+    const { items } = this.state
+    console.log(this.containerRef)
     return (
       <div className="app">
         <h1>Unlimited list</h1>
@@ -73,6 +70,9 @@ class App extends Component {
           <button type="button" onClick={this.select('window')}>
             Window scroll
           </button>
+          <button type="button" onClick={this.select('selfContained')}>
+            Self container scroll
+          </button>
           <input type="text" placeholder="scrollTo" onChange={this.scrollTo} />
           <input type="checkbox" defaultChecked={infiniteLoad} onChange={this.toggle('infiniteLoad')} />
           <span>Load more</span>
@@ -82,24 +82,38 @@ class App extends Component {
 
         {type === 'window' && (
           <UnlimitedList
+            scrollerRef={window}
             length={items.length}
             rowHeight={50}
             renderRow={this.renderRow(items)}
             overscan={3}
             className="my-list"
-            scrollWindow
             scrollToIndex={scrollToIndex}
             onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
           />
         )}
 
         {type === 'container' && (
+          <div ref={this.setContainerRef} className="my-list container-list">
+            <UnlimitedList
+              scrollerRef={this.containerRef}
+              length={items.length}
+              rowHeight={50}
+              renderRow={this.renderRow(items)}
+              overscan={3}
+              scrollToIndex={scrollToIndex}
+              onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
+            />
+          </div>
+        )}
+
+        {type === 'selfContained' && (
           <UnlimitedList
             length={items.length}
             rowHeight={50}
             renderRow={this.renderRow(items)}
             overscan={3}
-            className="my-list sized-list"
+            className="my-list self-list"
             scrollToIndex={scrollToIndex}
             onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
           />

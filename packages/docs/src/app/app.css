@@ -15,7 +15,13 @@
   border: 1px solid grey;
 }
 
-.sized-list {
+.container-list {
+  height: 600px;
+  overflow: auto;
+  will-change: scroll-position;
+}
+
+.self-list {
   height: 600px;
 }
 

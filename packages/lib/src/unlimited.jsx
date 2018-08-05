@@ -16,7 +16,6 @@ class Unlimited extends Component {
 
   componentDidMount() {
     const { scrollToIndex } = this.props
-
     this.scrollTicking = false
     this.getScroller().addEventListener('scroll', this.scrollListener)
 
@@ -46,27 +45,33 @@ class Unlimited extends Component {
   }
 
   getScroller = () => {
-    const { scrollWindow } = this.props
+    const { scrollerRef } = this.props
     const { current } = this.scroller
 
-    return scrollWindow ? window : current
+    if (scrollerRef) return scrollerRef
+    return current
   }
 
   getScrollerData = () => {
-    const { scrollWindow } = this.props
-    const { current } = this.scroller
+    const scroller = this.getScroller()
 
+    if (this.isWindowScroll()) {
+      return {
+        scrollTop: scroller.scrollY,
+        scrollHeight: scroller.innerHeight,
+      }
+    }
     return {
-      scrollTop: scrollWindow ? window.scrollY : current.scrollTop,
-      scrollHeight: scrollWindow ? window.innerHeight : current.clientHeight,
+      scrollTop: scroller.scrollTop,
+      scrollHeight: scroller.clientHeight,
     }
   }
 
   getIndexPosition = (index) => {
-    const { scrollWindow, rowHeight, length } = this.props
+    const { rowHeight, length } = this.props
     const { current } = this.wrapper
 
-    const offsetTop = scrollWindow ? current.offsetTop : 0
+    const offsetTop = this.isWindowScroll() ? current.offsetTop : 0
 
     if (index < 0) {
       return offsetTop
@@ -76,15 +81,16 @@ class Unlimited extends Component {
     return (index * rowHeight) + offsetTop
   }
 
-  scrollToIndex = (index) => {
-    const { scrollWindow } = this.props
 
+  isWindowScroll = () => this.getScroller() instanceof Window
+
+  scrollToIndex = (index) => {
     const top = this.getIndexPosition(index)
 
-    if (scrollWindow) {
+    if (this.isWindowScroll()) {
       setTimeout(() => window.scrollTo(0, top))
     } else {
-      this.scroller.current.scrollTop = top
+      this.getScroller().scrollTop = top
     }
   }
 
@@ -129,7 +135,6 @@ class Unlimited extends Component {
     const {
       length,
       overscan,
-      scrollWindow,
       rowHeight,
       onLoadMore,
     } = this.props
@@ -137,7 +142,7 @@ class Unlimited extends Component {
     const { current } = this.wrapper
     const { scrollTop, scrollHeight } = this.getScrollerData()
 
-    const top = scrollWindow ? scrollTop - current.offsetTop : scrollTop
+    const top = this.isWindowScroll() ? scrollTop - current.offsetTop : scrollTop
 
     const start = Math.floor(top / rowHeight)
     const end = start + Math.floor(scrollHeight / rowHeight)
@@ -171,9 +176,9 @@ class Unlimited extends Component {
   }
 
   render() {
-    const { scrollWindow, className } = this.props
+    const { scrollerRef, className } = this.props
 
-    if (scrollWindow) {
+    if (scrollerRef) {
       return this.renderList(className)
     }
 
@@ -196,16 +201,16 @@ Unlimited.propTypes = {
   length: PropTypes.number.isRequired,
   rowHeight: PropTypes.number.isRequired,
   renderRow: PropTypes.func.isRequired,
+  scrollerRef: PropTypes.any,
   overscan: PropTypes.number,
-  scrollWindow: PropTypes.bool,
   scrollToIndex: PropTypes.number,
   onLoadMore: PropTypes.func,
   className: PropTypes.string,
 }
 
 Unlimited.defaultProps = {
+  scrollerRef: undefined,
   overscan: 10,
-  scrollWindow: false,
   scrollToIndex: undefined,
   onLoadMore: undefined,
   className: undefined,
