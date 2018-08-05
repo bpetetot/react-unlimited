@@ -7,15 +7,15 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-dependencies-{{ checksum "yarn.lock" }}
           - v1-dependencies-
-      - run: yarn
+      - run: yarn install --frozen-lockfile
+      - run: yarn lint
       - save_cache:
           paths:
             - node_modules
             - ~/.cache/yarn
-          key: v1-dependencies-{{ checksum "package.json" }}
-      - run: yarn lint
+          key: v1-dependencies-{{ checksum "yarn.lock" }}
 
   build-lib:
     docker:
@@ -24,18 +24,18 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-dependencies-{{ checksum "yarn.lock" }}
           - v1-dependencies-
-      - run: yarn
-      - save_cache:
-          paths:
-            - node_modules
-            - ~/.cache/yarn
-          key: v1-dependencies-{{ checksum "package.json" }}
+      - run: yarn install --frozen-lockfile
       - run:
           command: |
             cd packages/lib
             yarn build
+      - save_cache:
+          paths:
+            - node_modules
+            - ~/.cache/yarn
+          key: v1-dependencies-{{ checksum "yarn.lock" }}
 
   build-docs:
     docker:
@@ -44,18 +44,18 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-dependencies-{{ checksum "yarn.lock" }}
           - v1-dependencies-
-      - run: yarn
-      - save_cache:
-          paths:
-            - node_modules
-            - ~/.cache/yarn
-          key: v1-dependencies-{{ checksum "package.json" }}
+      - run: yarn install --frozen-lockfile
       - run:
           command: |
             cd packages/docs
             yarn build
+      - save_cache:
+          paths:
+            - node_modules
+            - ~/.cache/yarn
+          key: v1-dependencies-{{ checksum "yarn.lock" }}
 
 workflows:
   version: 2
