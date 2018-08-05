@@ -27,10 +27,7 @@ jobs:
           - v1-dependencies-{{ checksum "yarn.lock" }}
           - v1-dependencies-
       - run: yarn install --frozen-lockfile
-      - run:
-          command: |
-            cd packages/lib
-            yarn build
+      - run: yarn build:lib
       - save_cache:
           paths:
             - node_modules
@@ -48,10 +45,7 @@ jobs:
           - v1-dependencies-
       - run: yarn install --frozen-lockfile
       - run: ls -la node_modules/infinite-list
-      - run:
-          command: |
-            cd packages/docs
-            yarn build
+      - run: yarn build:docs
       - save_cache:
           paths:
             - node_modules
