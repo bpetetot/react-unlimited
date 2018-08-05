@@ -11,7 +11,7 @@ class App extends Component {
     items: [],
     type: 'container',
     scrollToIndex: undefined,
-    loadMore: true,
+    infiniteLoad: true,
     showScrolling: false,
   }
 
@@ -59,7 +59,7 @@ class App extends Component {
   }
 
   render() {
-    const { type, scrollToIndex, loadMore } = this.state
+    const { type, scrollToIndex, infiniteLoad } = this.state
     const { items } = this.state
 
     return (
@@ -74,7 +74,7 @@ class App extends Component {
             Window scroll
           </button>
           <input type="text" placeholder="scrollTo" onChange={this.scrollTo} />
-          <input type="checkbox" onChange={this.toggle('loadMore')} />
+          <input type="checkbox" defaultChecked={infiniteLoad} onChange={this.toggle('infiniteLoad')} />
           <span>Load more</span>
           <input type="checkbox" onChange={this.toggle('showScrolling')} />
           <span>Show scrolling</span>
@@ -89,7 +89,7 @@ class App extends Component {
             className="my-list"
             scrollWindow
             scrollToIndex={scrollToIndex}
-            onLoadMore={loadMore ? this.handleLoadMore : undefined}
+            onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
           />
         )}
 
@@ -101,7 +101,7 @@ class App extends Component {
             overscan={3}
             className="my-list sized-list"
             scrollToIndex={scrollToIndex}
-            onLoadMore={loadMore ? this.handleLoadMore : undefined}
+            onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
           />
         )}
       </div>

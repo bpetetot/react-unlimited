@@ -15,9 +15,7 @@ export default {
     sourcemap: false,
     globals: {
       react: 'React',
-      classnames: 'cn',
       'prop-types': 'PropTypes',
-      'lodash/range': 'range',
     },
   },
   plugins: [
@@ -32,7 +30,5 @@ export default {
   external: [
     'react',
     'prop-types',
-    'lodash/range',
-    'classnames',
   ],
 }
