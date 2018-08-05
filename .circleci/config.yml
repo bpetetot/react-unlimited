@@ -2,10 +2,9 @@ version: 2
 jobs:
   lint:
     docker:
-      - image: circleci/node:9
+      - image: circleci/node:10
     steps:
-      - checkout:
-          path: git@github.com:bpetetot/react-unlimited.git
+      - checkout
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "yarn.lock" }}
@@ -20,7 +19,7 @@ jobs:
 
   build-lib:
     docker:
-      - image: circleci/node:9
+      - image: circleci/node:10
     steps:
       - checkout
       - restore_cache:
@@ -37,7 +36,7 @@ jobs:
 
   build-docs:
     docker:
-      - image: circleci/node:9
+      - image: circleci/node:10
     steps:
       - checkout
       - restore_cache:
