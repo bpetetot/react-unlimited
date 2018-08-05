@@ -44,7 +44,6 @@ jobs:
           - v1-dependencies-{{ checksum "yarn.lock" }}
           - v1-dependencies-
       - run: yarn install --frozen-lockfile
-      - run: ls -la node_modules/infinite-list
       - run: yarn build:docs
       - save_cache:
           paths:
