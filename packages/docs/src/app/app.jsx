@@ -55,10 +55,13 @@ class App extends Component {
   }
 
   render() {
-    const { type, scrollToIndex, infiniteLoad } = this.state
+    const {
+      items,
+      type,
+      scrollToIndex,
+      infiniteLoad,
+    } = this.state
 
-    const { items } = this.state
-    console.log(this.containerRef)
     return (
       <div className="app">
         <h1>Unlimited list</h1>
