@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import range from 'lodash/range'
 import toNumber from 'lodash/toNumber'
+import cn from 'classnames'
 
 import UnlimitedList from 'react-unlimited'
 
@@ -20,6 +21,10 @@ class App extends Component {
     this.setState({ items })
   }
 
+  setContainerRef = (ref) => {
+    this.containerRef = ref
+  }
+
   createItems = (start, end) => range(start, end).map(id => ({ name: `item-${id}` }))
 
   select = type => () => {
@@ -36,22 +41,14 @@ class App extends Component {
 
   handleLoadMore = () => {
     this.setState(({ items }) => ({
-      items: [
-        ...items,
-        ...this.createItems(items.length, items.length + 50),
-      ],
-    }
-    ))
+      items: [...items, ...this.createItems(items.length, items.length + 50)],
+    }))
   }
 
   renderRow = items => ({ index, style, isScrolling }) => {
     const { showScrolling } = this.state
     return (
-      <div
-        key={index}
-        className="cell"
-        style={style}
-      >
+      <div key={index} className="cell" style={style}>
         {items[index].name}
         {showScrolling && isScrolling ? ' is scrolling...' : null}
       </div>
@@ -59,19 +56,26 @@ class App extends Component {
   }
 
   render() {
-    const { type, scrollToIndex, infiniteLoad } = this.state
-    const { items } = this.state
+    const {
+      items,
+      type,
+      scrollToIndex,
+      infiniteLoad,
+    } = this.state
 
     return (
       <div className="app">
         <h1>Unlimited list</h1>
 
         <div className="toolbar">
-          <button type="button" onClick={this.select('container')}>
+          <button type="button" onClick={this.select('container')} className={cn({ 'btn-active': type === 'container' })}>
             Container scroll
           </button>
-          <button type="button" onClick={this.select('window')}>
+          <button type="button" onClick={this.select('window')} className={cn({ 'btn-active': type === 'window' })}>
             Window scroll
+          </button>
+          <button type="button" onClick={this.select('selfContained')} className={cn({ 'btn-active': type === 'selfContained' })}>
+            Self container scroll
           </button>
           <input type="text" placeholder="scrollTo" onChange={this.scrollTo} />
           <input type="checkbox" defaultChecked={infiniteLoad} onChange={this.toggle('infiniteLoad')} />
@@ -82,24 +86,39 @@ class App extends Component {
 
         {type === 'window' && (
           <UnlimitedList
+            scrollerRef={window}
             length={items.length}
             rowHeight={50}
             renderRow={this.renderRow(items)}
             overscan={3}
             className="my-list"
-            scrollWindow
             scrollToIndex={scrollToIndex}
             onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
           />
         )}
 
         {type === 'container' && (
+          <div ref={this.setContainerRef} className="container-list">
+            <h2>Scroll container is a parent of the list</h2>
+            <UnlimitedList
+              scrollerRef={this.containerRef}
+              length={items.length}
+              rowHeight={50}
+              renderRow={this.renderRow(items)}
+              overscan={3}
+              scrollToIndex={scrollToIndex}
+              onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
+            />
+          </div>
+        )}
+
+        {type === 'selfContained' && (
           <UnlimitedList
             length={items.length}
             rowHeight={50}
             renderRow={this.renderRow(items)}
             overscan={3}
-            className="my-list sized-list"
+            className="self-list"
             scrollToIndex={scrollToIndex}
             onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
           />

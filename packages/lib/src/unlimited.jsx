@@ -17,74 +17,112 @@ class Unlimited extends Component {
   componentDidMount() {
     const { scrollToIndex } = this.props
 
-    this.scrollTicking = false
-    this.getScroller().addEventListener('scroll', this.scrollListener)
+    if (this.isValidScroller()) {
+      this.addListeners()
 
-    this.resizeTicking = false
-    window.addEventListener('resize', this.resizeListener)
-
-    if (scrollToIndex) {
-      this.scrollToIndex(scrollToIndex)
-    } else {
-      this.updateList()
+      if (scrollToIndex) {
+        this.scrollToIndex(scrollToIndex)
+      } else {
+        this.updateList()
+      }
     }
   }
 
   componentDidUpdate(prevProps) {
     const { scrollToIndex, length } = this.props
-    if (length !== prevProps.length) {
-      this.updateList()
-    }
-    if (scrollToIndex && scrollToIndex !== prevProps.scrollToIndex) {
-      this.scrollToIndex(scrollToIndex)
+
+    if (this.isValidScroller()) {
+      if (this.getScroller() !== this.getScroller(prevProps)) {
+        this.removeListeners(prevProps)
+        this.addListeners()
+      }
+
+      if (length !== prevProps.length) {
+        this.updateList()
+      }
+
+      if (scrollToIndex && scrollToIndex !== prevProps.scrollToIndex) {
+        this.scrollToIndex(scrollToIndex)
+      }
     }
   }
 
   componentWillUnmount() {
-    this.getScroller().removeEventListener('scroll', this.scrollListener)
-    window.removeEventListener('resize', this.resizeListener)
+    this.removeListeners()
   }
 
-  getScroller = () => {
-    const { scrollWindow } = this.props
-    const { current } = this.scroller
+  getScroller = (props = this.props) => {
+    const { scrollerRef } = props
 
-    return scrollWindow ? window : current
+    if (scrollerRef) return scrollerRef
+    return this.scroller.current
   }
 
-  getScrollerData = () => {
-    const { scrollWindow } = this.props
-    const { current } = this.scroller
+  getScrollingData = () => {
+    const scroller = this.getScroller()
+    const { current } = this.wrapper
 
+    if (this.isWindowScroll()) {
+      return {
+        wrapperTop: current.offsetTop,
+        scrollTop: scroller.scrollY,
+        scrollHeight: scroller.innerHeight,
+      }
+    }
     return {
-      scrollTop: scrollWindow ? window.scrollY : current.scrollTop,
-      scrollHeight: scrollWindow ? window.innerHeight : current.clientHeight,
+      wrapperTop: current.offsetTop - scroller.offsetTop,
+      scrollTop: scroller.scrollTop,
+      scrollHeight: scroller.clientHeight,
     }
   }
 
   getIndexPosition = (index) => {
-    const { scrollWindow, rowHeight, length } = this.props
-    const { current } = this.wrapper
-
-    const offsetTop = scrollWindow ? current.offsetTop : 0
+    const { rowHeight, length } = this.props
+    const { wrapperTop } = this.getScrollingData()
 
     if (index < 0) {
-      return offsetTop
+      return wrapperTop
     } if (index >= length) {
-      return ((length - 1) * rowHeight) + offsetTop
+      return ((length - 1) * rowHeight) + wrapperTop
     }
-    return (index * rowHeight) + offsetTop
+    return (index * rowHeight) + wrapperTop
+  }
+
+  addListeners = (props) => {
+    const scroller = this.getScroller(props)
+
+    this.scrollTicking = false
+    if (scroller) scroller.addEventListener('scroll', this.scrollListener)
+
+    this.resizeTicking = false
+    window.addEventListener('resize', this.resizeListener)
+  }
+
+  removeListeners = (props) => {
+    const scroller = this.getScroller(props)
+
+    if (scroller) scroller.removeEventListener('scroll', this.scrollListener)
+
+    window.removeEventListener('resize', this.resizeListener)
+  }
+
+  isWindowScroll = () => this.getScroller() instanceof Window
+
+  isValidScroller = () => {
+    const scroller = this.getScroller()
+    if (!this.isWindowScroll()) {
+      return !!scroller && !!scroller.clientHeight && scroller.clientHeight > 0
+    }
+    return true
   }
 
   scrollToIndex = (index) => {
-    const { scrollWindow } = this.props
-
     const top = this.getIndexPosition(index)
 
-    if (scrollWindow) {
+    if (this.isWindowScroll()) {
       setTimeout(() => window.scrollTo(0, top))
     } else {
-      this.scroller.current.scrollTop = top
+      this.getScroller().scrollTop = top
     }
   }
 
@@ -129,20 +167,17 @@ class Unlimited extends Component {
     const {
       length,
       overscan,
-      scrollWindow,
       rowHeight,
       onLoadMore,
     } = this.props
+    const { isScrolling } = this.state
 
-    const { current } = this.wrapper
-    const { scrollTop, scrollHeight } = this.getScrollerData()
+    const { scrollTop, scrollHeight, wrapperTop } = this.getScrollingData()
 
-    const top = scrollWindow ? scrollTop - current.offsetTop : scrollTop
-
-    const start = Math.floor(top / rowHeight)
+    const start = Math.floor((scrollTop - wrapperTop) / rowHeight)
     const end = start + Math.floor(scrollHeight / rowHeight)
 
-    if (onLoadMore && end + overscan >= length) {
+    if (onLoadMore && isScrolling && end + overscan >= length) {
       onLoadMore()
     }
 
@@ -171,9 +206,15 @@ class Unlimited extends Component {
   }
 
   render() {
-    const { scrollWindow, className } = this.props
+    const { scrollerRef, className } = this.props
 
-    if (scrollWindow) {
+    if (scrollerRef && !this.isValidScroller()) {
+      // eslint-disable-next-line no-console
+      console.error('The scroller container (scrollerRef) has a clientHeight null or equals to 0.')
+      return null
+    }
+
+    if (scrollerRef) {
       return this.renderList(className)
     }
 
@@ -196,16 +237,16 @@ Unlimited.propTypes = {
   length: PropTypes.number.isRequired,
   rowHeight: PropTypes.number.isRequired,
   renderRow: PropTypes.func.isRequired,
+  scrollerRef: PropTypes.any,
   overscan: PropTypes.number,
-  scrollWindow: PropTypes.bool,
   scrollToIndex: PropTypes.number,
   onLoadMore: PropTypes.func,
   className: PropTypes.string,
 }
 
 Unlimited.defaultProps = {
+  scrollerRef: undefined,
   overscan: 10,
-  scrollWindow: false,
   scrollToIndex: undefined,
   onLoadMore: undefined,
   className: undefined,

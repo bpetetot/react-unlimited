@@ -11,12 +11,21 @@
   margin-right: 10px;
 }
 
-.my-list {
+.btn-active {
+  border: 2px solid blue;
+  border-radius: 3px;
+}
+
+.container-list {
+  height: 600px;
+  overflow: auto;
+  will-change: scroll-position;
   border: 1px solid grey;
 }
 
-.sized-list {
+.self-list {
   height: 600px;
+  border: 1px solid grey;
 }
 
 .cell {
