@@ -64,29 +64,31 @@ class Unlimited extends Component {
 
     if (this.isWindowScroll()) {
       return {
+        offsetTop: 0,
         scrollTop: scroller.scrollY,
         scrollHeight: scroller.innerHeight,
       }
     }
     return {
+      offsetTop: scroller.offsetTop,
       scrollTop: scroller.scrollTop,
       scrollHeight: scroller.clientHeight,
     }
   }
 
-  // TODO check offset here
   getIndexPosition = (index) => {
     const { rowHeight, length } = this.props
     const { current } = this.wrapper
+    const { offsetTop } = this.getScroller()
 
-    const offsetTop = this.isWindowScroll() ? current.offsetTop : 0
+    const top = this.isWindowScroll() ? current.offsetTop : current.offsetTop - offsetTop
 
     if (index < 0) {
-      return offsetTop
+      return top
     } if (index >= length) {
-      return ((length - 1) * rowHeight) + offsetTop
+      return ((length - 1) * rowHeight) + top
     }
-    return (index * rowHeight) + offsetTop
+    return (index * rowHeight) + top
   }
 
   addListeners = (props) => {
@@ -164,7 +166,6 @@ class Unlimited extends Component {
     this.resizeTicking = true
   }
 
-  // TODO check offset here
   updateList = () => {
     const {
       length,
@@ -175,14 +176,14 @@ class Unlimited extends Component {
     const { isScrolling } = this.state
 
     const { current } = this.wrapper
-    const { scrollTop, scrollHeight } = this.getScrollerData()
+    const { scrollTop, scrollHeight, offsetTop } = this.getScrollerData()
 
-    const top = this.isWindowScroll() ? scrollTop - current.offsetTop : scrollTop
+    const top = this.isWindowScroll() ? scrollTop - current.offsetTop : scrollTop - (current.offsetTop - offsetTop)
 
     const start = Math.floor(top / rowHeight)
     const end = start + Math.floor(scrollHeight / rowHeight)
 
-    if (onLoadMore && end + overscan >= length && isScrolling) {
+    if (onLoadMore && isScrolling && end + overscan >= length) {
       onLoadMore()
     }
 
