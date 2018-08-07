@@ -159,7 +159,7 @@ class Unlimited extends Component {
     const end = start + Math.floor(scrollHeight / rowHeight)
 
     if (onLoadMore && end + overscan >= length) {
-      onLoadMore()
+      setTimeout(onLoadMore)
     }
 
     this.setState({
