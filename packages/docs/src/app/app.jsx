@@ -13,7 +13,6 @@ class App extends Component {
     type: 'container',
     scrollToIndex: undefined,
     infiniteLoad: true,
-    showScrolling: false,
   }
 
   componentDidMount() {
@@ -45,15 +44,11 @@ class App extends Component {
     }))
   }
 
-  renderRow = items => ({ index, style, isScrolling }) => {
-    const { showScrolling } = this.state
-    return (
-      <div key={index} className="cell" style={style}>
-        {items[index].name}
-        {showScrolling && isScrolling ? ' is scrolling...' : null}
-      </div>
-    )
-  }
+  renderRow = items => ({ index, style }) => (
+    <div key={index} className="cell" style={style}>
+      {items[index].name}
+    </div>
+  )
 
   render() {
     const {
@@ -80,8 +75,6 @@ class App extends Component {
           <input type="text" placeholder="scrollTo" onChange={this.scrollTo} />
           <input type="checkbox" defaultChecked={infiniteLoad} onChange={this.toggle('infiniteLoad')} />
           <span>Load more</span>
-          <input type="checkbox" onChange={this.toggle('showScrolling')} />
-          <span>Show scrolling</span>
         </div>
 
         {type === 'window' && (

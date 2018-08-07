@@ -11,7 +11,6 @@ class Unlimited extends Component {
   state = {
     startIndex: -1,
     endIndex: -1,
-    isScrolling: false,
   }
 
   componentDidMount() {
@@ -126,26 +125,9 @@ class Unlimited extends Component {
     }
   }
 
-  checkIsScrolling = () => {
-    const { isScrolling } = this.state
-
-    if (this.scrollingTimeout) {
-      clearTimeout(this.scrollingTimeout)
-    }
-
-    this.scrollingTimeout = setTimeout(() => {
-      this.setState({ isScrolling: false })
-    }, 100)
-
-    if (!isScrolling) {
-      this.setState({ isScrolling: true })
-    }
-  }
-
   scrollListener = () => {
     if (!this.scrollTicking) {
       window.requestAnimationFrame(() => {
-        this.checkIsScrolling()
         this.updateList()
         this.scrollTicking = false
       })
@@ -170,14 +152,13 @@ class Unlimited extends Component {
       rowHeight,
       onLoadMore,
     } = this.props
-    const { isScrolling } = this.state
 
     const { scrollTop, scrollHeight, wrapperTop } = this.getScrollingData()
 
     const start = Math.floor((scrollTop - wrapperTop) / rowHeight)
     const end = start + Math.floor(scrollHeight / rowHeight)
 
-    if (onLoadMore && isScrolling && end + overscan >= length) {
+    if (onLoadMore && end + overscan >= length) {
       onLoadMore()
     }
 
@@ -189,14 +170,13 @@ class Unlimited extends Component {
 
   renderList = (className) => {
     const { length, renderRow, rowHeight } = this.props
-    const { startIndex, endIndex, isScrolling } = this.state
+    const { startIndex, endIndex } = this.state
 
     return (
       <List
         ref={this.wrapper}
         startIndex={startIndex}
         endIndex={endIndex}
-        isScrolling={isScrolling}
         height={rowHeight * length}
         rowHeight={rowHeight}
         renderRow={renderRow}
