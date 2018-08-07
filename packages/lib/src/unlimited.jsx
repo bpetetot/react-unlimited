@@ -53,24 +53,24 @@ class Unlimited extends Component {
 
   getScroller = (props = this.props) => {
     const { scrollerRef } = props
-    const { current } = this.scroller
 
     if (scrollerRef) return scrollerRef
-    return current
+    return this.scroller.current
   }
 
-  getScrollerData = () => {
+  getScrollingData = () => {
     const scroller = this.getScroller()
+    const { current } = this.wrapper
 
     if (this.isWindowScroll()) {
       return {
-        offsetTop: 0,
+        wrapperTop: current.offsetTop,
         scrollTop: scroller.scrollY,
         scrollHeight: scroller.innerHeight,
       }
     }
     return {
-      offsetTop: scroller.offsetTop,
+      wrapperTop: current.offsetTop - scroller.offsetTop,
       scrollTop: scroller.scrollTop,
       scrollHeight: scroller.clientHeight,
     }
@@ -78,17 +78,14 @@ class Unlimited extends Component {
 
   getIndexPosition = (index) => {
     const { rowHeight, length } = this.props
-    const { current } = this.wrapper
-    const { offsetTop } = this.getScroller()
-
-    const top = this.isWindowScroll() ? current.offsetTop : current.offsetTop - offsetTop
+    const { wrapperTop } = this.getScrollingData()
 
     if (index < 0) {
-      return top
+      return wrapperTop
     } if (index >= length) {
-      return ((length - 1) * rowHeight) + top
+      return ((length - 1) * rowHeight) + wrapperTop
     }
-    return (index * rowHeight) + top
+    return (index * rowHeight) + wrapperTop
   }
 
   addListeners = (props) => {
@@ -175,12 +172,9 @@ class Unlimited extends Component {
     } = this.props
     const { isScrolling } = this.state
 
-    const { current } = this.wrapper
-    const { scrollTop, scrollHeight, offsetTop } = this.getScrollerData()
+    const { scrollTop, scrollHeight, wrapperTop } = this.getScrollingData()
 
-    const top = this.isWindowScroll() ? scrollTop - current.offsetTop : scrollTop - (current.offsetTop - offsetTop)
-
-    const start = Math.floor(top / rowHeight)
+    const start = Math.floor((scrollTop - wrapperTop) / rowHeight)
     const end = start + Math.floor(scrollHeight / rowHeight)
 
     if (onLoadMore && isScrolling && end + overscan >= length) {
