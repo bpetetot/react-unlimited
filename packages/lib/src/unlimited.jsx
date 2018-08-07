@@ -16,36 +16,43 @@ class Unlimited extends Component {
 
   componentDidMount() {
     const { scrollToIndex } = this.props
-    this.scrollTicking = false
-    this.getScroller().addEventListener('scroll', this.scrollListener)
 
-    this.resizeTicking = false
-    window.addEventListener('resize', this.resizeListener)
+    if (this.isValidScroller()) {
+      this.addListeners()
 
-    if (scrollToIndex) {
-      this.scrollToIndex(scrollToIndex)
-    } else {
-      this.updateList()
+      if (scrollToIndex) {
+        this.scrollToIndex(scrollToIndex)
+      } else {
+        this.updateList()
+      }
     }
   }
 
   componentDidUpdate(prevProps) {
     const { scrollToIndex, length } = this.props
-    if (length !== prevProps.length) {
-      this.updateList()
-    }
-    if (scrollToIndex && scrollToIndex !== prevProps.scrollToIndex) {
-      this.scrollToIndex(scrollToIndex)
+
+    if (this.isValidScroller()) {
+      if (this.getScroller() !== this.getScroller(prevProps)) {
+        this.removeListeners(prevProps)
+        this.addListeners()
+      }
+
+      if (length !== prevProps.length) {
+        this.updateList()
+      }
+
+      if (scrollToIndex && scrollToIndex !== prevProps.scrollToIndex) {
+        this.scrollToIndex(scrollToIndex)
+      }
     }
   }
 
   componentWillUnmount() {
-    this.getScroller().removeEventListener('scroll', this.scrollListener)
-    window.removeEventListener('resize', this.resizeListener)
+    this.removeListeners()
   }
 
-  getScroller = () => {
-    const { scrollerRef } = this.props
+  getScroller = (props = this.props) => {
+    const { scrollerRef } = props
     const { current } = this.scroller
 
     if (scrollerRef) return scrollerRef
@@ -67,6 +74,7 @@ class Unlimited extends Component {
     }
   }
 
+  // TODO check offset here
   getIndexPosition = (index) => {
     const { rowHeight, length } = this.props
     const { current } = this.wrapper
@@ -81,8 +89,33 @@ class Unlimited extends Component {
     return (index * rowHeight) + offsetTop
   }
 
+  addListeners = (props) => {
+    const scroller = this.getScroller(props)
+
+    this.scrollTicking = false
+    if (scroller) scroller.addEventListener('scroll', this.scrollListener)
+
+    this.resizeTicking = false
+    window.addEventListener('resize', this.resizeListener)
+  }
+
+  removeListeners = (props) => {
+    const scroller = this.getScroller(props)
+
+    if (scroller) scroller.removeEventListener('scroll', this.scrollListener)
+
+    window.removeEventListener('resize', this.resizeListener)
+  }
 
   isWindowScroll = () => this.getScroller() instanceof Window
+
+  isValidScroller = () => {
+    const scroller = this.getScroller()
+    if (!this.isWindowScroll()) {
+      return !!scroller && !!scroller.clientHeight && scroller.clientHeight > 0
+    }
+    return true
+  }
 
   scrollToIndex = (index) => {
     const top = this.getIndexPosition(index)
@@ -131,6 +164,7 @@ class Unlimited extends Component {
     this.resizeTicking = true
   }
 
+  // TODO check offset here
   updateList = () => {
     const {
       length,
@@ -138,6 +172,7 @@ class Unlimited extends Component {
       rowHeight,
       onLoadMore,
     } = this.props
+    const { isScrolling } = this.state
 
     const { current } = this.wrapper
     const { scrollTop, scrollHeight } = this.getScrollerData()
@@ -147,7 +182,7 @@ class Unlimited extends Component {
     const start = Math.floor(top / rowHeight)
     const end = start + Math.floor(scrollHeight / rowHeight)
 
-    if (onLoadMore && end + overscan >= length) {
+    if (onLoadMore && end + overscan >= length && isScrolling) {
       onLoadMore()
     }
 
@@ -177,6 +212,12 @@ class Unlimited extends Component {
 
   render() {
     const { scrollerRef, className } = this.props
+
+    if (scrollerRef && !this.isValidScroller()) {
+      // eslint-disable-next-line no-console
+      console.error('The scroller container (scrollerRef) has a clientHeight null or equals to 0.')
+      return null
+    }
 
     if (scrollerRef) {
       return this.renderList(className)

@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import range from 'lodash/range'
 import toNumber from 'lodash/toNumber'
+import cn from 'classnames'
 
 import UnlimitedList from 'react-unlimited'
 
@@ -67,13 +68,13 @@ class App extends Component {
         <h1>Unlimited list</h1>
 
         <div className="toolbar">
-          <button type="button" onClick={this.select('container')}>
+          <button type="button" onClick={this.select('container')} className={cn({ 'btn-active': type === 'container' })}>
             Container scroll
           </button>
-          <button type="button" onClick={this.select('window')}>
+          <button type="button" onClick={this.select('window')} className={cn({ 'btn-active': type === 'window' })}>
             Window scroll
           </button>
-          <button type="button" onClick={this.select('selfContained')}>
+          <button type="button" onClick={this.select('selfContained')} className={cn({ 'btn-active': type === 'selfContained' })}>
             Self container scroll
           </button>
           <input type="text" placeholder="scrollTo" onChange={this.scrollTo} />
@@ -97,7 +98,8 @@ class App extends Component {
         )}
 
         {type === 'container' && (
-          <div ref={this.setContainerRef} className="my-list container-list">
+          <div ref={this.setContainerRef} className="container-list">
+            <h2>Scroll container is a parent of the list</h2>
             <UnlimitedList
               scrollerRef={this.containerRef}
               length={items.length}
@@ -116,7 +118,7 @@ class App extends Component {
             rowHeight={50}
             renderRow={this.renderRow(items)}
             overscan={3}
-            className="my-list self-list"
+            className="self-list"
             scrollToIndex={scrollToIndex}
             onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
           />
