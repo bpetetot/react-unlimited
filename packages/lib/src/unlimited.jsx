@@ -101,8 +101,10 @@ class Unlimited extends Component {
     const scroller = this.getScroller(props)
 
     if (scroller) scroller.removeEventListener('scroll', this.scrollListener)
-
     window.removeEventListener('resize', this.resizeListener)
+
+    if (this.scrollRAF) cancelAnimationFrame(this.scrollRAF)
+    if (this.resizeRAF) cancelAnimationFrame(this.resizeRAF)
   }
 
   isWindowScroll = () => this.getScroller() instanceof Window
@@ -127,7 +129,7 @@ class Unlimited extends Component {
 
   scrollListener = () => {
     if (!this.scrollTicking) {
-      window.requestAnimationFrame(() => {
+      this.scrollRAF = window.requestAnimationFrame(() => {
         this.updateList()
         this.scrollTicking = false
       })
@@ -137,7 +139,7 @@ class Unlimited extends Component {
 
   resizeListener = () => {
     if (!this.resizeTicking) {
-      window.requestAnimationFrame(() => {
+      this.resizeRAF = window.requestAnimationFrame(() => {
         this.updateList()
         this.resizeTicking = false
       })
@@ -159,7 +161,7 @@ class Unlimited extends Component {
     const end = start + Math.floor(scrollHeight / rowHeight)
 
     if (onLoadMore && end + overscan >= length) {
-      setTimeout(onLoadMore)
+      onLoadMore()
     }
 
     this.setState({
