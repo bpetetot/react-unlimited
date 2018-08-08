@@ -10,10 +10,11 @@ class List extends Component {
       position: 'absolute',
       width: '100%',
       height: `${rowHeight}px`,
-      top: index * rowHeight,
+      top: 0,
+      transform: `translate(0, ${index * rowHeight}px)`,
       left: 0,
       boxSizing: 'border-box',
-      willChange: 'top',
+      willChange: 'transform',
     }
     return renderRow({ index, style })
   }
