@@ -17,7 +17,7 @@ export default {
       react: 'React',
       'prop-types': 'PropTypes',
       fastdom: 'fastdom',
-      fastdomPromised: 'fastdom/extensions/fastdom-promised',
+      'fastdom/extensions/fastdom-promised': 'fastdomPromised',
     },
   },
   plugins: [
@@ -33,6 +33,6 @@ export default {
     'react',
     'prop-types',
     'fastdom',
-    'fastdomPromised',
+    'fastdom/extensions/fastdom-promised',
   ],
 }
