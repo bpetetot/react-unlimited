@@ -21,10 +21,10 @@
   overflow: auto;
   will-change: scroll-position;
   border: 1px solid grey;
+  padding: 20px;
 }
 
-.self-list {
-  height: 600px;
+.my-list {
   border: 1px solid grey;
 }
 

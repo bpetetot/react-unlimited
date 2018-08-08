@@ -3,7 +3,7 @@ import range from 'lodash/range'
 import toNumber from 'lodash/toNumber'
 import cn from 'classnames'
 
-import UnlimitedList from 'react-unlimited'
+import UnlimitedList, { UnlimitedSizedList } from 'react-unlimited'
 
 import './app.css'
 
@@ -69,23 +69,13 @@ class App extends Component {
           <button type="button" onClick={this.select('window')} className={cn({ 'btn-active': type === 'window' })}>
             Window scroll
           </button>
+          <button type="button" onClick={this.select('sized')} className={cn({ 'btn-active': type === 'sized' })}>
+            Sized
+          </button>
           <input type="text" placeholder="scrollTo" onChange={this.scrollTo} />
           <input type="checkbox" defaultChecked={infiniteLoad} onChange={this.toggle('infiniteLoad')} />
           <span>Load more</span>
         </div>
-
-        {type === 'window' && (
-          <UnlimitedList
-            scrollerRef={window}
-            length={items.length}
-            rowHeight={50}
-            renderRow={this.renderRow(items)}
-            overscan={3}
-            className="my-list"
-            scrollToIndex={scrollToIndex}
-            onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
-          />
-        )}
 
         {type === 'container' && (
           <div ref={this.setContainerRef} className="container-list">
@@ -100,6 +90,33 @@ class App extends Component {
               onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
             />
           </div>
+        )}
+
+        {type === 'window' && (
+          <UnlimitedList
+            scrollerRef={window}
+            length={items.length}
+            rowHeight={50}
+            renderRow={this.renderRow(items)}
+            overscan={3}
+            className="my-list"
+            scrollToIndex={scrollToIndex}
+            onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
+          />
+        )}
+
+        {type === 'sized' && (
+          <UnlimitedSizedList
+            height={400}
+            width={600}
+            length={items.length}
+            rowHeight={50}
+            renderRow={this.renderRow(items)}
+            overscan={3}
+            className="my-list"
+            scrollToIndex={scrollToIndex}
+            onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
+          />
         )}
       </div>
     )
