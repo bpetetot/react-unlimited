@@ -10,12 +10,10 @@ class List extends Component {
       position: 'absolute',
       width: '100%',
       height: `${rowHeight}px`,
-      top: 0,
-      transform: `translate(0, ${index * rowHeight}px)`,
-      left: 0,
+      top: index * rowHeight,
       boxSizing: 'border-box',
-      willChange: 'transform',
     }
+
     return renderRow({ index, style })
   }
 
@@ -37,7 +35,10 @@ class List extends Component {
         style={{
           position: 'relative',
           overflow: 'hidden',
+          width: 'auto',
+          maxWidth: '800px',
           height: `${height}px`,
+          maxHeight: `${height}px`,
           boxSizing: 'border-box',
         }}
       >

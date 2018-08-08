@@ -19,7 +19,6 @@
 .container-list {
   height: 600px;
   overflow: auto;
-  will-change: scroll-position;
   border: 1px solid grey;
   padding: 20px;
 }

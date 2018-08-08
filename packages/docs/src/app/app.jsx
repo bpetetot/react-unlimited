@@ -12,7 +12,7 @@ class App extends Component {
     items: [],
     type: 'container',
     scrollToIndex: undefined,
-    infiniteLoad: true,
+    infiniteLoad: false,
     containerRef: undefined,
   }
 
