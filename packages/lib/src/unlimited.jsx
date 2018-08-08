@@ -6,7 +6,7 @@ import fastdom from 'fastdom'
 
 import List from './list'
 
-const myFastdom = fastdom.extend(fastdomPromised);
+const myFastdom = fastdom.extend(fastdomPromised)
 
 class Unlimited extends Component {
   wrapper = React.createRef();
@@ -18,8 +18,7 @@ class Unlimited extends Component {
 
   componentDidMount() {
     const { scrollerRef, scrollToIndex } = this.props
-    console.log('mount', scrollerRef)
-    
+
     if (scrollerRef) {
       this.addListeners()
 
@@ -57,21 +56,21 @@ class Unlimited extends Component {
     const { scrollerRef } = this.props
     const { current } = this.wrapper
 
-    if (this.isWindowScroll()) {
+    if (scrollerRef instanceof Window) {
       return {
-        wrapperTop: !!current ? current.offsetTop : 0,
+        wrapperTop: current.offsetTop,
         scrollTop: scrollerRef.scrollY,
         scrollHeight: scrollerRef.innerHeight,
       }
     }
     return {
-      wrapperTop: !!current ? current.offsetTop - scrollerRef.offsetTop : scrollerRef.offsetTop,
+      wrapperTop: current.offsetTop - scrollerRef.offsetTop,
       scrollTop: scrollerRef.scrollTop,
       scrollHeight: scrollerRef.clientHeight,
     }
   })
 
-  getIndexPosition = (index) => this.getScrollingData()
+  getIndexPosition = index => this.getScrollingData()
     .then(({ wrapperTop }) => {
       const { rowHeight, length } = this.props
       if (index < 0) {
@@ -102,15 +101,16 @@ class Unlimited extends Component {
     if (this.resizeRAF) cancelAnimationFrame(this.resizeRAF)
   }
 
-  isWindowScroll = () => this.props.scrollerRef instanceof Window
 
   scrollToIndex = (index) => {
     const { scrollerRef } = this.props
-    this.getIndexPosition(index).then(top => {
-      if (this.isWindowScroll()) {
+    this.getIndexPosition(index).then((top) => {
+      if (scrollerRef instanceof Window) {
         setTimeout(() => scrollerRef.scrollTo(0, top))
       } else {
-        myFastdom.mutate(() => scrollerRef.scrollTop = top)
+        myFastdom.mutate(() => {
+          scrollerRef.scrollTop = top
+        })
       }
     })
   }
@@ -146,11 +146,11 @@ class Unlimited extends Component {
     this.getScrollingData().then(({ scrollTop, scrollHeight, wrapperTop }) => {
       const start = Math.floor((scrollTop - wrapperTop) / rowHeight)
       const end = start + Math.floor(scrollHeight / rowHeight)
-  
+
       if (onLoadMore && end + overscan >= length) {
         onLoadMore()
       }
-  
+
       this.setState({
         startIndex: start - overscan >= 0 ? start - overscan : 0,
         endIndex: end + overscan < length ? end + overscan : (length - 1),
@@ -194,6 +194,7 @@ Unlimited.propTypes = {
 }
 
 Unlimited.defaultProps = {
+  scrollerRef: undefined,
   overscan: 10,
   scrollToIndex: undefined,
   onLoadMore: undefined,

@@ -21,7 +21,7 @@ class App extends Component {
     this.setState({ items })
   }
 
-  setContainerRef = (containerRef) => this.setState({ containerRef })
+  setContainerRef = containerRef => this.setState({ containerRef })
 
   createItems = (start, end) => range(start, end).map(id => ({ name: `item-${id}` }))
 
