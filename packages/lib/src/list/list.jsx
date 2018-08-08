@@ -26,7 +26,12 @@ class List extends Component {
   }
 
   render() {
-    const { forwardedRef, height, className } = this.props
+    const {
+      forwardedRef,
+      height,
+      width,
+      className,
+    } = this.props
 
     return (
       <div
@@ -36,7 +41,7 @@ class List extends Component {
           position: 'relative',
           overflow: 'hidden',
           width: 'auto',
-          maxWidth: '800px',
+          maxWidth: `${width}px`,
           height: `${height}px`,
           maxHeight: `${height}px`,
           boxSizing: 'border-box',
@@ -53,6 +58,7 @@ List.propTypes = {
   startIndex: PropTypes.number.isRequired,
   endIndex: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
+  width: PropTypes.number.isRequired,
   rowHeight: PropTypes.number.isRequired,
   renderRow: PropTypes.func.isRequired,
   className: PropTypes.string,

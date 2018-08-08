@@ -14,6 +14,8 @@ class Unlimited extends Component {
   state = {
     startIndex: -1,
     endIndex: -1,
+    height: 0,
+    width: 0,
   }
 
   componentDidMount() {
@@ -21,6 +23,7 @@ class Unlimited extends Component {
 
     if (scrollerRef) {
       this.addListeners()
+      this.updateDimensions()
 
       if (scrollToIndex) {
         this.scrollToIndex(scrollToIndex)
@@ -37,10 +40,12 @@ class Unlimited extends Component {
       this.removeListeners(prevProps)
       this.addListeners()
       this.updateList()
+      this.updateDimensions()
     }
 
     if (length !== prevProps.length) {
       this.updateList()
+      this.updateDimensions()
     }
 
     if (scrollToIndex && scrollToIndex !== prevProps.scrollToIndex) {
@@ -61,12 +66,14 @@ class Unlimited extends Component {
         wrapperTop: current.offsetTop,
         scrollTop: scrollerRef.scrollY,
         scrollHeight: scrollerRef.innerHeight,
+        scrollWidth: scrollerRef.innerWidth,
       }
     }
     return {
       wrapperTop: current.offsetTop - scrollerRef.offsetTop,
       scrollTop: scrollerRef.scrollTop,
       scrollHeight: scrollerRef.clientHeight,
+      scrollWidth: scrollerRef.clientWidth,
     }
   })
 
@@ -101,7 +108,6 @@ class Unlimited extends Component {
     if (this.resizeRAF) cancelAnimationFrame(this.resizeRAF)
   }
 
-
   scrollToIndex = (index) => {
     const { scrollerRef } = this.props
     this.getIndexPosition(index).then((top) => {
@@ -129,11 +135,21 @@ class Unlimited extends Component {
     if (!this.resizeTicking) {
       this.resizeRAF = window.requestAnimationFrame(() => {
         this.updateList()
+        this.updateDimensions()
         this.resizeTicking = false
       })
     }
     this.resizeTicking = true
   }
+
+  updateDimensions = () => this.getScrollingData()
+    .then(({ scrollWidth }) => {
+      const { length, rowHeight } = this.props
+      this.setState({
+        height: rowHeight * length,
+        width: scrollWidth,
+      })
+    })
 
   updateList = () => {
     const {
@@ -159,15 +175,21 @@ class Unlimited extends Component {
   }
 
   renderList = (className) => {
-    const { length, renderRow, rowHeight } = this.props
-    const { startIndex, endIndex } = this.state
+    const { renderRow, rowHeight } = this.props
+    const {
+      startIndex,
+      endIndex,
+      width,
+      height,
+    } = this.state
 
     return (
       <List
         ref={this.wrapper}
         startIndex={startIndex}
         endIndex={endIndex}
-        height={rowHeight * length}
+        height={height}
+        width={width}
         rowHeight={rowHeight}
         renderRow={renderRow}
         className={className}
