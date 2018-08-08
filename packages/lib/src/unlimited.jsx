@@ -1,12 +1,15 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
+import fastdomPromised from 'fastdom/extensions/fastdom-promised'
+import fastdom from 'fastdom'
+
 import List from './list'
+
+const myFastdom = fastdom.extend(fastdomPromised);
 
 class Unlimited extends Component {
   wrapper = React.createRef();
-
-  scroller = React.createRef();
 
   state = {
     startIndex: -1,
@@ -14,9 +17,10 @@ class Unlimited extends Component {
   }
 
   componentDidMount() {
-    const { scrollToIndex } = this.props
-
-    if (this.isValidScroller()) {
+    const { scrollerRef, scrollToIndex } = this.props
+    console.log('mount', scrollerRef)
+    
+    if (scrollerRef) {
       this.addListeners()
 
       if (scrollToIndex) {
@@ -28,21 +32,20 @@ class Unlimited extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { scrollToIndex, length } = this.props
+    const { scrollerRef, scrollToIndex, length } = this.props
 
-    if (this.isValidScroller()) {
-      if (this.getScroller() !== this.getScroller(prevProps)) {
-        this.removeListeners(prevProps)
-        this.addListeners()
-      }
+    if (scrollerRef && scrollerRef !== prevProps.scrollerRef) {
+      this.removeListeners(prevProps)
+      this.addListeners()
+      this.updateList()
+    }
 
-      if (length !== prevProps.length) {
-        this.updateList()
-      }
+    if (length !== prevProps.length) {
+      this.updateList()
+    }
 
-      if (scrollToIndex && scrollToIndex !== prevProps.scrollToIndex) {
-        this.scrollToIndex(scrollToIndex)
-      }
+    if (scrollToIndex && scrollToIndex !== prevProps.scrollToIndex) {
+      this.scrollToIndex(scrollToIndex)
     }
   }
 
@@ -50,81 +53,66 @@ class Unlimited extends Component {
     this.removeListeners()
   }
 
-  getScroller = (props = this.props) => {
-    const { scrollerRef } = props
-
-    if (scrollerRef) return scrollerRef
-    return this.scroller.current
-  }
-
-  getScrollingData = () => {
-    const scroller = this.getScroller()
+  getScrollingData = () => myFastdom.measure(() => {
+    const { scrollerRef } = this.props
     const { current } = this.wrapper
 
     if (this.isWindowScroll()) {
       return {
-        wrapperTop: current.offsetTop,
-        scrollTop: scroller.scrollY,
-        scrollHeight: scroller.innerHeight,
+        wrapperTop: !!current ? current.offsetTop : 0,
+        scrollTop: scrollerRef.scrollY,
+        scrollHeight: scrollerRef.innerHeight,
       }
     }
     return {
-      wrapperTop: current.offsetTop - scroller.offsetTop,
-      scrollTop: scroller.scrollTop,
-      scrollHeight: scroller.clientHeight,
+      wrapperTop: !!current ? current.offsetTop - scrollerRef.offsetTop : scrollerRef.offsetTop,
+      scrollTop: scrollerRef.scrollTop,
+      scrollHeight: scrollerRef.clientHeight,
     }
-  }
+  })
 
-  getIndexPosition = (index) => {
-    const { rowHeight, length } = this.props
-    const { wrapperTop } = this.getScrollingData()
+  getIndexPosition = (index) => this.getScrollingData()
+    .then(({ wrapperTop }) => {
+      const { rowHeight, length } = this.props
+      if (index < 0) {
+        return wrapperTop
+      } if (index >= length) {
+        return ((length - 1) * rowHeight) + wrapperTop
+      }
+      return (index * rowHeight) + wrapperTop
+    })
 
-    if (index < 0) {
-      return wrapperTop
-    } if (index >= length) {
-      return ((length - 1) * rowHeight) + wrapperTop
-    }
-    return (index * rowHeight) + wrapperTop
-  }
-
-  addListeners = (props) => {
-    const scroller = this.getScroller(props)
+  addListeners = (props = this.props) => {
+    const { scrollerRef } = props
 
     this.scrollTicking = false
-    if (scroller) scroller.addEventListener('scroll', this.scrollListener)
+    if (scrollerRef) scrollerRef.addEventListener('scroll', this.scrollListener)
 
     this.resizeTicking = false
     window.addEventListener('resize', this.resizeListener)
   }
 
-  removeListeners = (props) => {
-    const scroller = this.getScroller(props)
+  removeListeners = (props = this.props) => {
+    const { scrollerRef } = props
 
-    if (scroller) scroller.removeEventListener('scroll', this.scrollListener)
+    if (scrollerRef) scrollerRef.removeEventListener('scroll', this.scrollListener)
     window.removeEventListener('resize', this.resizeListener)
 
     if (this.scrollRAF) cancelAnimationFrame(this.scrollRAF)
     if (this.resizeRAF) cancelAnimationFrame(this.resizeRAF)
   }
 
-  isWindowScroll = () => this.getScroller() instanceof Window
-
-  isValidScroller = () => {
-    const scroller = this.getScroller()
-    if (!this.isWindowScroll()) {
-      return !!scroller && !!scroller.clientHeight && scroller.clientHeight > 0
-    }
-    return true
-  }
+  isWindowScroll = () => this.props.scrollerRef instanceof Window
 
   scrollToIndex = (index) => {
-    const top = this.getIndexPosition(index)
-
-    if (this.isWindowScroll()) {
-      setTimeout(() => window.scrollTo(0, top))
-    } else {
-      this.getScroller().scrollTop = top
-    }
+    const { scrollerRef } = this.props
+    this.getIndexPosition(index).then(top => {
+      if (this.isWindowScroll()) {
+        setTimeout(() => scrollerRef.scrollTo(0, top))
+      } else {
+        myFastdom.mutate(() => scrollerRef.scrollTop = top)
+      }
+    })
   }
 
   scrollListener = () => {
@@ -155,18 +143,18 @@ class Unlimited extends Component {
       onLoadMore,
     } = this.props
 
-    const { scrollTop, scrollHeight, wrapperTop } = this.getScrollingData()
-
-    const start = Math.floor((scrollTop - wrapperTop) / rowHeight)
-    const end = start + Math.floor(scrollHeight / rowHeight)
-
-    if (onLoadMore && end + overscan >= length) {
-      onLoadMore()
-    }
-
-    this.setState({
-      startIndex: start - overscan >= 0 ? start - overscan : 0,
-      endIndex: end + overscan < length ? end + overscan : (length - 1),
+    this.getScrollingData().then(({ scrollTop, scrollHeight, wrapperTop }) => {
+      const start = Math.floor((scrollTop - wrapperTop) / rowHeight)
+      const end = start + Math.floor(scrollHeight / rowHeight)
+  
+      if (onLoadMore && end + overscan >= length) {
+        onLoadMore()
+      }
+  
+      this.setState({
+        startIndex: start - overscan >= 0 ? start - overscan : 0,
+        endIndex: end + overscan < length ? end + overscan : (length - 1),
+      })
     })
   }
 
@@ -188,30 +176,9 @@ class Unlimited extends Component {
   }
 
   render() {
-    const { scrollerRef, className } = this.props
+    const { className } = this.props
 
-    if (scrollerRef && !this.isValidScroller()) {
-      // eslint-disable-next-line no-console
-      console.error('The scroller container (scrollerRef) has a clientHeight null or equals to 0.')
-      return null
-    }
-
-    if (scrollerRef) {
-      return this.renderList(className)
-    }
-
-    return (
-      <div
-        ref={this.scroller}
-        className={className}
-        style={{
-          overflow: 'auto',
-          willChange: 'scroll-position',
-        }}
-      >
-        {this.renderList()}
-      </div>
-    )
+    return this.renderList(className)
   }
 }
 
@@ -227,7 +194,6 @@ Unlimited.propTypes = {
 }
 
 Unlimited.defaultProps = {
-  scrollerRef: undefined,
   overscan: 10,
   scrollToIndex: undefined,
   onLoadMore: undefined,

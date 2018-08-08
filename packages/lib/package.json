@@ -39,8 +39,8 @@
     "rollup-plugin-terser": "^1.0.1"
   },
   "peerDependencies": {
-    "react": "16.x",
-    "prop-types": "15.x"
+    "prop-types": "15.x",
+    "react": "16.x"
   },
   "jest": {
     "coverageDirectory": "./coverage/"
@@ -61,5 +61,8 @@
       "transform-react-jsx",
       "transform-object-rest-spread"
     ]
+  },
+  "dependencies": {
+    "fastdom": "^1.0.8"
   }
 }

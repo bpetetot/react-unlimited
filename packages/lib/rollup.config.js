@@ -16,6 +16,8 @@ export default {
     globals: {
       react: 'React',
       'prop-types': 'PropTypes',
+      fastdom: 'fastdom',
+      fastdomPromised: 'fastdom/extensions/fastdom-promised',
     },
   },
   plugins: [
@@ -30,5 +32,7 @@ export default {
   external: [
     'react',
     'prop-types',
+    'fastdom',
+    'fastdomPromised',
   ],
 }
