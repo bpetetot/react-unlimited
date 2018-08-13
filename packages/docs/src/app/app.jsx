@@ -3,7 +3,7 @@ import range from 'lodash/range'
 import toNumber from 'lodash/toNumber'
 import cn from 'classnames'
 
-import UnlimitedList from 'react-unlimited'
+import { UnlimitedList, UnlimitedSizedList } from 'react-unlimited'
 
 import './app.css'
 
@@ -12,18 +12,16 @@ class App extends Component {
     items: [],
     type: 'container',
     scrollToIndex: undefined,
-    infiniteLoad: true,
-    showScrolling: false,
+    infiniteLoad: false,
+    containerRef: undefined,
   }
 
   componentDidMount() {
-    const items = this.createItems(0, 100)
+    const items = this.createItems(0, 1000)
     this.setState({ items })
   }
 
-  setContainerRef = (ref) => {
-    this.containerRef = ref
-  }
+  setContainerRef = containerRef => this.setState({ containerRef })
 
   createItems = (start, end) => range(start, end).map(id => ({ name: `item-${id}` }))
 
@@ -45,15 +43,11 @@ class App extends Component {
     }))
   }
 
-  renderRow = items => ({ index, style, isScrolling }) => {
-    const { showScrolling } = this.state
-    return (
-      <div key={index} className="cell" style={style}>
-        {items[index].name}
-        {showScrolling && isScrolling ? ' is scrolling...' : null}
-      </div>
-    )
-  }
+  renderRow = items => ({ index, style }) => (
+    <div key={index} className="cell" style={style}>
+      {items[index].name}
+    </div>
+  )
 
   render() {
     const {
@@ -61,6 +55,7 @@ class App extends Component {
       type,
       scrollToIndex,
       infiniteLoad,
+      containerRef,
     } = this.state
 
     return (
@@ -74,15 +69,28 @@ class App extends Component {
           <button type="button" onClick={this.select('window')} className={cn({ 'btn-active': type === 'window' })}>
             Window scroll
           </button>
-          <button type="button" onClick={this.select('selfContained')} className={cn({ 'btn-active': type === 'selfContained' })}>
-            Self container scroll
+          <button type="button" onClick={this.select('sized')} className={cn({ 'btn-active': type === 'sized' })}>
+            Sized
           </button>
           <input type="text" placeholder="scrollTo" onChange={this.scrollTo} />
           <input type="checkbox" defaultChecked={infiniteLoad} onChange={this.toggle('infiniteLoad')} />
           <span>Load more</span>
-          <input type="checkbox" onChange={this.toggle('showScrolling')} />
-          <span>Show scrolling</span>
         </div>
+
+        {type === 'container' && (
+          <div ref={this.setContainerRef} className="container-list">
+            <h2>Scroll container is a parent of the list</h2>
+            <UnlimitedList
+              scrollerRef={containerRef}
+              length={items.length}
+              rowHeight={50}
+              renderRow={this.renderRow(items)}
+              overscan={3}
+              scrollToIndex={scrollToIndex}
+              onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
+            />
+          </div>
+        )}
 
         {type === 'window' && (
           <UnlimitedList
@@ -97,28 +105,15 @@ class App extends Component {
           />
         )}
 
-        {type === 'container' && (
-          <div ref={this.setContainerRef} className="container-list">
-            <h2>Scroll container is a parent of the list</h2>
-            <UnlimitedList
-              scrollerRef={this.containerRef}
-              length={items.length}
-              rowHeight={50}
-              renderRow={this.renderRow(items)}
-              overscan={3}
-              scrollToIndex={scrollToIndex}
-              onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
-            />
-          </div>
-        )}
-
-        {type === 'selfContained' && (
-          <UnlimitedList
+        {type === 'sized' && (
+          <UnlimitedSizedList
+            height={400}
+            width={600}
             length={items.length}
             rowHeight={50}
             renderRow={this.renderRow(items)}
             overscan={3}
-            className="self-list"
+            className="my-list"
             scrollToIndex={scrollToIndex}
             onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
           />

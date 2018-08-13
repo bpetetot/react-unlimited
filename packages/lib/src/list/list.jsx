@@ -4,18 +4,18 @@ import { range } from '../utils'
 
 class List extends Component {
   handleRenderRow = (index) => {
-    const { renderRow, rowHeight, isScrolling } = this.props
+    const { renderRow, rowHeight } = this.props
 
     const style = {
       position: 'absolute',
       width: '100%',
       height: `${rowHeight}px`,
-      top: index * rowHeight,
-      left: 0,
+      willChange: 'transform',
+      transform: `translate3d(0, ${index * rowHeight}px, 0)`,
       boxSizing: 'border-box',
-      willChange: 'top',
     }
-    return renderRow({ index, style, isScrolling })
+
+    return renderRow({ index, style })
   }
 
   renderList = () => {
@@ -27,7 +27,12 @@ class List extends Component {
   }
 
   render() {
-    const { forwardedRef, height, className } = this.props
+    const {
+      forwardedRef,
+      height,
+      width,
+      className,
+    } = this.props
 
     return (
       <div
@@ -36,7 +41,10 @@ class List extends Component {
         style={{
           position: 'relative',
           overflow: 'hidden',
+          width: 'auto',
+          maxWidth: `${width}px`,
           height: `${height}px`,
+          maxHeight: `${height}px`,
           boxSizing: 'border-box',
         }}
       >
@@ -50,15 +58,14 @@ List.propTypes = {
   forwardedRef: PropTypes.any.isRequired,
   startIndex: PropTypes.number.isRequired,
   endIndex: PropTypes.number.isRequired,
-  isScrolling: PropTypes.bool,
   height: PropTypes.number.isRequired,
+  width: PropTypes.number.isRequired,
   rowHeight: PropTypes.number.isRequired,
   renderRow: PropTypes.func.isRequired,
   className: PropTypes.string,
 }
 
 List.defaultProps = {
-  isScrolling: false,
   className: undefined,
 }
 
