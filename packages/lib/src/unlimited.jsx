@@ -9,13 +9,15 @@ import List from './list'
 const myFastdom = fastdom.extend(fastdomPromised)
 
 class Unlimited extends Component {
-  wrapper = React.createRef();
+  wrapper = React.createRef()
 
   state = {
     startIndex: -1,
     endIndex: -1,
     height: 0,
     width: 0,
+    lastScrollTop: 0,
+    lastScrollTime: Date.now(),
   }
 
   componentDidMount() {
@@ -150,15 +152,32 @@ class Unlimited extends Component {
       wrapperTop,
     }) => {
       const { length, overscan, rowHeight } = this.props
+      const { lastScrollTop, lastScrollTime } = this.state
 
+      // compute start and end index window
       const start = Math.floor((scrollTop - wrapperTop) / rowHeight)
       const end = start + Math.floor(scrollHeight / rowHeight)
 
+      // compute scroll velocity
+      const time = Math.min(1, (Date.now() - lastScrollTime) / 16)
+      const delta = Math.min(scrollHeight, scrollTop - lastScrollTop)
+      const scrollVelocitySize = Math.floor((delta * time) / rowHeight)
+
+      // compute overscan with scroll velocity
+      let overscanStart = overscan
+      let overscanEnd = overscan
+      if (scrollVelocitySize < 0) {
+        overscanStart = overscan + Math.abs(scrollVelocitySize)
+      } else if (scrollVelocitySize > 0) {
+        overscanEnd = overscan + Math.abs(scrollVelocitySize)
+      }
+
       return {
-        startIndex: start - overscan >= 0 ? start - overscan : 0,
-        endIndex: end + overscan < length ? end + overscan : (length - 1),
+        startIndex: start - overscanStart >= 0 ? start - overscanStart : 0,
+        endIndex: end + overscanEnd < length ? end + overscanEnd : (length - 1),
         height: rowHeight * length,
         width: scrollWidth,
+        scrollTop,
       }
     });
 
@@ -169,11 +188,20 @@ class Unlimited extends Component {
     const { length, onLoadMore, overscan } = this.props
 
     this.computePosition()
-      .then(({ startIndex, endIndex }) => {
+      .then(({
+        startIndex,
+        endIndex,
+        scrollTop,
+      }) => {
         if (onLoadMore && (endIndex + overscan) >= length) {
           onLoadMore()
         }
-        this.setState({ startIndex, endIndex })
+        this.setState(() => ({
+          startIndex,
+          endIndex,
+          lastScrollTop: scrollTop,
+          lastScrollTime: Date.now(),
+        }))
       })
   }
 

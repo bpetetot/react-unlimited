@@ -85,7 +85,7 @@ class App extends Component {
               length={items.length}
               rowHeight={50}
               renderRow={this.renderRow(items)}
-              overscan={3}
+              overscan={5}
               scrollToIndex={scrollToIndex}
               onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
             />
@@ -98,7 +98,7 @@ class App extends Component {
             length={items.length}
             rowHeight={50}
             renderRow={this.renderRow(items)}
-            overscan={3}
+            overscan={5}
             className="my-list"
             scrollToIndex={scrollToIndex}
             onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
@@ -112,7 +112,7 @@ class App extends Component {
             length={items.length}
             rowHeight={50}
             renderRow={this.renderRow(items)}
-            overscan={3}
+            overscan={5}
             className="my-list"
             scrollToIndex={scrollToIndex}
             onLoadMore={infiniteLoad ? this.handleLoadMore : undefined}
