@@ -8,7 +8,7 @@
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
     "react-scripts": "1.1.4",
-    "react-unlimited": "0.1.0-rc1"
+    "react-unlimited": "0.1.0-rc2"
   },
   "scripts": {
     "start": "react-scripts start",
