@@ -17,7 +17,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    const items = this.createItems(0, 1000)
+    const items = this.createItems(0, 100)
     this.setState({ items })
   }
 

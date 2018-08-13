@@ -11,6 +11,8 @@ const myFastdom = fastdom.extend(fastdomPromised)
 class Unlimited extends Component {
   wrapper = React.createRef()
 
+  isScrollingTimeout = null
+
   state = {
     startIndex: -1,
     endIndex: -1,
@@ -18,6 +20,7 @@ class Unlimited extends Component {
     width: 0,
     lastScrollTop: 0,
     lastScrollTime: Date.now(),
+    isScrolling: false,
   }
 
   componentDidMount() {
@@ -57,6 +60,7 @@ class Unlimited extends Component {
 
   componentWillUnmount() {
     this.removeListeners()
+    if (this.isScrollingTimeout) clearTimeout(this.isScrollingTimeout)
   }
 
   getScrollingData = () => myFastdom.measure(() => {
@@ -201,9 +205,20 @@ class Unlimited extends Component {
           endIndex,
           lastScrollTop: scrollTop,
           lastScrollTime: Date.now(),
-        }))
+          isScrolling: true,
+        }), this.resetIsScrollingDebounced)
       })
   }
+
+  resetIsScrollingDebounced = () => {
+    if (this.isScrollingTimeout) clearTimeout(this.isScrollingTimeout)
+    this.isScrollingTimeout = setTimeout(this.resetIsScrolling, 150)
+  };
+
+  resetIsScrolling = () => {
+    this.isScrollingTimeout = null
+    this.setState({ isScrolling: false })
+  };
 
   renderList = (className) => {
     const { renderRow, rowHeight } = this.props
@@ -212,6 +227,7 @@ class Unlimited extends Component {
       endIndex,
       width,
       height,
+      isScrolling,
     } = this.state
 
     return (
@@ -221,6 +237,7 @@ class Unlimited extends Component {
         endIndex={endIndex}
         height={height}
         width={width}
+        isScrolling={isScrolling}
         rowHeight={rowHeight}
         renderRow={renderRow}
         className={className}

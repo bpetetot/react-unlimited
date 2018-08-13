@@ -4,7 +4,7 @@ import { range } from '../utils'
 
 class List extends Component {
   handleRenderRow = (index) => {
-    const { renderRow, rowHeight } = this.props
+    const { renderRow, rowHeight, isScrolling } = this.props
 
     const style = {
       position: 'absolute',
@@ -15,7 +15,7 @@ class List extends Component {
       boxSizing: 'border-box',
     }
 
-    return renderRow({ index, style })
+    return renderRow({ index, style, isScrolling })
   }
 
   renderList = () => {
@@ -31,6 +31,7 @@ class List extends Component {
       forwardedRef,
       height,
       width,
+      isScrolling,
       className,
     } = this.props
 
@@ -46,6 +47,7 @@ class List extends Component {
           height: `${height}px`,
           maxHeight: `${height}px`,
           boxSizing: 'border-box',
+          pointerEvents: isScrolling ? 'none' : '',
         }}
       >
         {this.renderList()}
@@ -62,10 +64,12 @@ List.propTypes = {
   width: PropTypes.number.isRequired,
   rowHeight: PropTypes.number.isRequired,
   renderRow: PropTypes.func.isRequired,
+  isScrolling: PropTypes.bool,
   className: PropTypes.string,
 }
 
 List.defaultProps = {
+  isScrolling: false,
   className: undefined,
 }
 
