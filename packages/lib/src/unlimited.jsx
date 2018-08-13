@@ -142,36 +142,39 @@ class Unlimited extends Component {
     this.resizeTicking = true
   }
 
-  updateDimensions = () => this.getScrollingData()
-    .then(({ scrollWidth }) => {
-      const { length, rowHeight } = this.props
-      this.setState({
-        height: rowHeight * length,
-        width: scrollWidth,
-      })
-    })
+  computePosition = () => this.getScrollingData()
+    .then(({
+      scrollTop,
+      scrollHeight,
+      scrollWidth,
+      wrapperTop,
+    }) => {
+      const { length, overscan, rowHeight } = this.props
 
-  updateList = () => {
-    const {
-      length,
-      overscan,
-      rowHeight,
-      onLoadMore,
-    } = this.props
-
-    this.getScrollingData().then(({ scrollTop, scrollHeight, wrapperTop }) => {
       const start = Math.floor((scrollTop - wrapperTop) / rowHeight)
       const end = start + Math.floor(scrollHeight / rowHeight)
 
-      if (onLoadMore && end + overscan >= length) {
-        onLoadMore()
-      }
-
-      this.setState({
+      return {
         startIndex: start - overscan >= 0 ? start - overscan : 0,
         endIndex: end + overscan < length ? end + overscan : (length - 1),
+        height: rowHeight * length,
+        width: scrollWidth,
+      }
+    });
+
+  updateDimensions = () => this.computePosition()
+    .then(({ height, width }) => this.setState({ height, width }))
+
+  updateList = () => {
+    const { length, onLoadMore, overscan } = this.props
+
+    this.computePosition()
+      .then(({ startIndex, endIndex }) => {
+        if (onLoadMore && (endIndex + overscan) >= length) {
+          onLoadMore()
+        }
+        this.setState({ startIndex, endIndex })
       })
-    })
   }
 
   renderList = (className) => {

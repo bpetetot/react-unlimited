@@ -1,3 +1,3 @@
-export { default as UnlimitedSizedList } from './sized'
+export { default as UnlimitedList } from './sized'
 
-export { default } from './unlimited'
+export { default as UnlimitedSizedList } from './sized'

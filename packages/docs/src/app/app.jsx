@@ -3,7 +3,7 @@ import range from 'lodash/range'
 import toNumber from 'lodash/toNumber'
 import cn from 'classnames'
 
-import UnlimitedList, { UnlimitedSizedList } from 'react-unlimited'
+import { UnlimitedList, UnlimitedSizedList } from 'react-unlimited'
 
 import './app.css'
 

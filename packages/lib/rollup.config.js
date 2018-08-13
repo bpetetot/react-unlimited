@@ -9,6 +9,7 @@ const pkg = JSON.parse(fs.readFileSync('./package.json'))
 export default {
   input: 'src/index.js',
   output: {
+    exports: 'named',
     name: pkg.name,
     file: `dist/index.${process.env.FORMAT}.js`,
     format: process.env.FORMAT,
