@@ -20,6 +20,7 @@
   height: 600px;
   overflow: auto;
   border: 1px solid grey;
+  background: #ddd;
   padding: 20px;
 }
 
@@ -31,5 +32,6 @@
   display: flex;
   align-items: center;
   border: 1px solid #ddd;
+  background: #fff;
   padding: 5px;
 }
