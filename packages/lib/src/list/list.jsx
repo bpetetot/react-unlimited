@@ -10,7 +10,8 @@ class List extends Component {
       position: 'absolute',
       width: '100%',
       height: `${rowHeight}px`,
-      top: index * rowHeight,
+      willChange: 'transform',
+      transform: `translate3d(0, ${index * rowHeight}px, 0)`,
       boxSizing: 'border-box',
     }
 
